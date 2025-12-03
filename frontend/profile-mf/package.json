@@ -2,7 +2,7 @@
   "name": "@ecommerce/profile-mf",
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack serve --mode development --port 3005",
+    "start": "webpack serve --mode development --port 6006",
     "build": "webpack --mode production"
   },
   "dependencies": {

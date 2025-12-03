@@ -2,7 +2,7 @@
   "name": "@ecommerce/checkout-mf",
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack serve --mode development --port 3004",
+    "start": "webpack serve --mode development --port 6004",
     "build": "webpack --mode production"
   },
   "dependencies": {

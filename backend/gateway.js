@@ -16,6 +16,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Request timeout (only for non-proxy routes)
 app.use((req, res, next) => {
@@ -126,29 +127,53 @@ app.post('/api/auth/test-direct', (req, res) => {
 // Simple cart implementation (no auth required)
 let cartItems = [];
 
+// Test endpoint to debug request body
+app.post('/api/test', (req, res) => {
+  console.log('TEST ENDPOINT - Raw body:', req.body);
+  console.log('TEST ENDPOINT - Headers:', req.headers);
+  res.json({ received: req.body, success: true });
+});
+
 app.post('/api/cart/add', (req, res) => {
-  console.log('Cart add request:', req.body);
+  console.log('=== CART ADD DEBUG ===');
+  console.log('Raw body:', req.body);
+  console.log('Body type:', typeof req.body);
+  console.log('Body keys:', Object.keys(req.body || {}));
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Body string:', JSON.stringify(req.body));
+  
   const { productId, quantity = 1, name, price, image } = req.body;
+  console.log('Extracted:', { productId, quantity, name, price, image });
+  
+  // Allow empty productId for now
+  console.log('ProductId check:', productId, 'Type:', typeof productId);
   
   const existingItem = cartItems.find(item => item.productId === productId);
   
   if (existingItem) {
     existingItem.quantity += quantity;
+    console.log('Updated existing item:', existingItem);
   } else {
-    cartItems.push({ 
-      productId, 
-      quantity, 
-      name: name || 'Unknown Product',
+    const newItem = { 
+      productId: String(productId), 
+      quantity: parseInt(quantity) || 1, 
+      name: String(name || `Product ${productId}`),
       price: parseFloat(price) || 0,
-      image: image || 'https://via.placeholder.com/300x200',
+      image: String(image || 'https://via.placeholder.com/300x200'),
       addedAt: new Date() 
-    });
+    };
+    cartItems.push(newItem);
+    console.log('Added new item:', newItem);
   }
+  
+  console.log('Current cart:', cartItems);
+  console.log('======================');
   
   res.json({ 
     success: true, 
     message: 'Product added to cart successfully',
-    cartItems: cartItems.length
+    cartItems: cartItems.length,
+    item: cartItems[cartItems.length - 1]
   });
 });
 

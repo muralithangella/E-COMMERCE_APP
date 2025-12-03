@@ -2,7 +2,7 @@
   "name": "@ecommerce/auth-mf",
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack serve --mode development --port 3001",
+    "start": "webpack serve --mode development --port 6008",
     "build": "webpack --mode production"
   },
   "dependencies": {

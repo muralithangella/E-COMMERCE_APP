@@ -1,20 +1,30 @@
 import React from 'react';
 
+import React from 'react';
+
 const SimpleCartItem = ({ item }) => {
-  console.log('SimpleCartItem received:', item);
-  
+  console.log('Rendering cart item:', item); // Add this line for debugging
+
   const handleRemove = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/${item.productId}`, {
+      const itemId = item._id || item.productId;
+      const response = await fetch(`http://localhost:5000/api/cart/items/${itemId}`, {
         method: 'DELETE'
       });
       if (response.ok) {
-        window.location.reload(); // Simple reload for now
+        window.location.reload();
       }
     } catch (error) {
       console.error('Failed to remove item:', error);
     }
   };
+
+  // Safely get product details with better fallbacks
+  const productName = item.name || item.product?.name || 'Unknown Product';
+  const productPrice = item.price || item.product?.price || 0;
+  const productImage = item.image || item.product?.images?.[0]?.url || 'https://via.placeholder.com/100x100';
+  const quantity = item.quantity || 1;
+  const totalPrice = (productPrice * quantity).toFixed(2);
 
   return (
     <div style={{
@@ -27,22 +37,22 @@ const SimpleCartItem = ({ item }) => {
       backgroundColor: '#fff'
     }}>
       <img 
-        src={item.image || 'https://via.placeholder.com/100x100'} 
-        alt={item.name || 'Product'}
+        src={productImage} 
+        alt={productName}
         style={{ width: '100px', height: '100px', objectFit: 'cover', marginRight: '15px' }}
       />
       
       <div style={{ flex: 1 }}>
-        <h4 style={{ margin: '0 0 5px 0' }}>{item.name && item.name !== 'Unknown Product' ? item.name : `Product ${item.productId}`}</h4>
-        <p style={{ margin: '0', color: '#666' }}>Quantity: {item.quantity}</p>
+        <h4 style={{ margin: '0 0 5px 0' }}>{productName}</h4>
+        <p style={{ margin: '0', color: '#666' }}>Quantity: {quantity}</p>
         <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold' }}>
-          ${(item.price || 0).toFixed(2)} each
+          ${productPrice.toFixed(2)} each
         </p>
       </div>
       
       <div style={{ textAlign: 'right' }}>
         <p style={{ margin: '0 0 10px 0', fontSize: '20px', fontWeight: 'bold' }}>
-          ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+          ${totalPrice}
         </p>
         <button 
           onClick={handleRemove}
@@ -50,7 +60,7 @@ const SimpleCartItem = ({ item }) => {
             backgroundColor: '#dc3545',
             color: 'white',
             border: 'none',
-            padding: '8px 16px',
+            padding: '5px 10px',
             borderRadius: '4px',
             cursor: 'pointer'
           }}

@@ -3,6 +3,11 @@ import React, { useState, useEffect } from 'react';
 const addToCart = async (product) => {
   try {
     console.log('Adding product to cart:', product);
+    console.log('Product._id:', product._id);
+    console.log('Product.id:', product.id);
+    console.log('Product keys:', Object.keys(product));
+    console.log('Product name:', product.name);
+    console.log('Product price:', product.price);
     
     if (!product || !product._id) {
       console.error('Invalid product data:', product);
@@ -10,24 +15,53 @@ const addToCart = async (product) => {
       return;
     }
     
-    const cartData = { 
-      productId: product._id, 
+    // Ensure all data is properly formatted
+    const cartData = {
+      productId: String(product._id || product.id || Date.now()),
       quantity: 1,
-      name: product.name || 'Unknown Product',
-      price: parseFloat(product.price) || 0,
-      image: product.image || 'https://via.placeholder.com/300x200'
+      name: String(product.name || 'Unknown Product'),
+      price: Number(product.price || 0),
+      image: String(product.image || 'https://via.placeholder.com/300x200')
     };
+    
+    // Double check the data
+    if (!cartData.name || cartData.name === 'undefined') {
+      cartData.name = `${product.name || 'Product'} - ${product._id}`;
+    }
+    if (!cartData.price || isNaN(cartData.price)) {
+      cartData.price = Number(product.price) || 0;
+    }
+    
+    console.log('Product._id:', product._id);
+    console.log('Final cartData:', cartData);
+    
+    // Test with simple data first
+    if (!cartData.productId) {
+      alert('Product ID is missing!');
+      return;
+    }
     console.log('Sending cart data:', cartData);
-    const jsonBody = JSON.stringify(cartData);
-    console.log('JSON body being sent:', jsonBody);
+    console.log('Sending cart data:', cartData);
+    
+    // Use URL parameters to bypass JSON issues
+    const params = new URLSearchParams({
+      productId: String(product._id),
+      quantity: '1',
+      name: String(product.name),
+      price: String(product.price),
+      image: String(product.image || 'https://via.placeholder.com/300x200')
+    });
     
     const response = await fetch('http://localhost:5000/api/cart/add', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: jsonBody
+      body: params
     });
+    
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
     
     if (response.ok) {
       const data = await response.json();
@@ -36,12 +70,14 @@ const addToCart = async (product) => {
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       alert('Product added to cart!');
     } else {
-      console.error('Failed to add to cart');
-      alert('Failed to add to cart');
+      const errorText = await response.text();
+      console.error('Failed to add to cart. Status:', response.status, 'Error:', errorText);
+      alert(`Failed to add to cart: ${response.status} - ${errorText}`);
     }
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    alert('Error adding to cart');
+    console.error('Network error adding to cart:', error);
+    console.error('Error details:', error.message);
+    alert(`Network error: ${error.message}`);
   }
 };
 

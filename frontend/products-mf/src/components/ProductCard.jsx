@@ -7,7 +7,10 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     dispatch(addToCart({
-      productId: product._id,
+      product: {  // Pass the complete product object
+        ...product,
+        price: product.price?.sale || product.price?.regular || product.price
+      },
       quantity: 1
     }));
   };
