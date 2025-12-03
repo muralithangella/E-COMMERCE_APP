@@ -1,0 +1,50 @@
+{
+  "name": "@ecommerce/frontend",
+  "version": "1.0.0",
+  "description": "E-commerce Micro-Frontend Architecture",
+  "private": true,
+  "workspaces": [
+    "shell",
+    "auth-mf",
+    "products-mf",
+    "cart-mf",
+    "checkout-mf",
+    "profile-mf",
+    "shared"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:workspaces",
+    "install:workspaces": "npm install --workspaces",
+    "start": "concurrently \"npm run start:shell\" \"npm run start:auth\" \"npm run start:products\" \"npm run start:cart\" \"npm run start:checkout\" \"npm run start:profile\"",
+    "start:shell": "cd shell && npm start",
+    "start:auth": "cd auth-mf && npm start",
+    "start:products": "cd products-mf && npm start",
+    "start:cart": "cd cart-mf && npm start",
+    "start:checkout": "cd checkout-mf && npm start",
+    "start:profile": "cd profile-mf && npm start",
+    "build": "npm run build --workspaces",
+    "build:shell": "cd shell && npm run build",
+    "build:auth": "cd auth-mf && npm run build",
+    "build:products": "cd products-mf && npm run build",
+    "build:cart": "cd cart-mf && npm run build",
+    "build:checkout": "cd checkout-mf && npm run build",
+    "build:profile": "cd profile-mf && npm run build",
+    "test": "npm run test --workspaces",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "eslint": "^8.48.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

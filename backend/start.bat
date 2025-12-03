@@ -1,0 +1,16 @@
+@echo off
+echo Starting E-commerce Backend...
+
+echo Installing dependencies...
+npm install
+
+echo Starting MongoDB (if not running)...
+net start MongoDB
+
+echo Starting Redis (if not running)...
+redis-server --daemonize yes
+
+echo Starting the application...
+npm start
+
+pause

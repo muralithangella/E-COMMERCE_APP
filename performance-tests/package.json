@@ -1,0 +1,16 @@
+{
+  "name": "ecommerce-performance-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test:artillery": "artillery run artillery-config.yml",
+    "test:k6": "k6 run k6-script.js",
+    "test:lighthouse": "node lighthouse-test.js",
+    "test:all": "npm run test:lighthouse && npm run test:artillery",
+    "install:tools": "npm install -g artillery k6 && npm install lighthouse chrome-launcher"
+  },
+  "dependencies": {
+    "lighthouse": "^10.4.0",
+    "chrome-launcher": "^0.15.2",
+    "autocannon": "^7.12.0"
+  }
+}

@@ -1,0 +1,160 @@
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.cart-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cart-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 16px;
+}
+
+.cart-header h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.item-count {
+  color: #666;
+  font-size: 16px;
+}
+
+.cart-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.cart-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.item-details h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.item-price {
+  color: #666;
+  font-size: 14px;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-controls button {
+  width: 32px;
+  height: 32px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-controls span {
+  min-width: 24px;
+  text-align: center;
+}
+
+.item-total {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.remove-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.cart-summary {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 8px;
+  height: fit-content;
+}
+
+.cart-summary h3 {
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.summary-line.total {
+  border-top: 1px solid #ddd;
+  font-weight: 600;
+  font-size: 18px;
+  margin-top: 16px;
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.checkout-btn {
+  background: #28a745;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.clear-btn {
+  background: #6c757d;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .cart-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .cart-item {
+    grid-template-columns: 60px 1fr;
+    gap: 12px;
+  }
+  
+  .quantity-controls,
+  .item-total,
+  .remove-btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
