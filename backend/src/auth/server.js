@@ -8,7 +8,7 @@ const { errorHandler } = require('../../middleware/errorHandler');
 const DatabaseManager = require('../../config/database');
 
 const app = express();
-const PORT = process.env.AUTH_SERVICE_PORT || 3001;
+const PORT = process.env.AUTH_SERVICE_PORT || 3009;
 
 // Middleware
 app.use(helmet());

@@ -69,22 +69,47 @@ app.use('/api/categories', createProxyMiddleware({
   }
 }));
 
-// Auth service proxy
-app.use('/api/auth', createProxyMiddleware({
-  target: 'http://localhost:3009',
-  changeOrigin: true,
-  timeout: 5000,
-  proxyTimeout: 5000,
-  onError: (err, req, res) => {
-    console.error('Auth proxy error:', err.message);
-    if (!res.headersSent) {
-      res.status(503).json({ message: 'Auth service unavailable' });
+// Direct auth implementation (bypass proxy)
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://muralithangella_db_user:sW6i6ceY2q1W0oTc@fullstack.qnyvzwj.mongodb.net/ecommerce');
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
+  role: { type: String, default: 'user' },
+  isActive: { type: Boolean, default: true }
+});
+
+userSchema.methods.comparePassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email, isActive: true }).select('+password');
+    
+    if (!user || !await user.comparePassword(password)) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying to: http://localhost:3009${req.url}`);
+    
+    const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '24h' });
+    res.json({ 
+      message: 'Login successful',
+      user: { id: user._id, email: user.email, name: user.name },
+      accessToken: token
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Login failed' });
   }
-}));
+});
 
 // Other API routes
 ['products', 'orders', 'payments', 'inventory', 'notifications', 'users'].forEach(service => {

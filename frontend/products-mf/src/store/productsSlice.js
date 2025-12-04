@@ -1,35 +1,63 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { productsAPI, categoriesAPI } from '../../../shared/services/api'
+
+const API_BASE = 'http://localhost:5000/api'
 
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async (params = {}) => {
-    const response = await productsAPI.getProducts(params)
-    return response.data
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams(params).toString()
+      const response = await fetch(`${API_BASE}/products?${queryParams}`)
+      if (!response.ok) throw new Error('Failed to fetch products')
+      const data = await response.json()
+      return data.data || data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
   }
 )
 
 export const searchProducts = createAsyncThunk(
   'products/searchProducts',
-  async ({ query, filters = {} }) => {
-    const response = await productsAPI.searchProducts(query, filters)
-    return response.data
+  async ({ query, filters = {} }, { rejectWithValue }) => {
+    try {
+      const params = { search: query, ...filters }
+      const queryParams = new URLSearchParams(params).toString()
+      const response = await fetch(`${API_BASE}/products?${queryParams}`)
+      if (!response.ok) throw new Error('Failed to search products')
+      const data = await response.json()
+      return data.data || data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
   }
 )
 
 export const fetchCategories = createAsyncThunk(
   'products/fetchCategories',
-  async () => {
-    const response = await categoriesAPI.getCategories()
-    return response.data
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE}/categories`)
+      if (!response.ok) throw new Error('Failed to fetch categories')
+      const data = await response.json()
+      return data.data || data.categories || data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
   }
 )
 
 export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
-  async (id) => {
-    const response = await productsAPI.getProduct(id)
-    return response.data
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE}/products/${id}`)
+      if (!response.ok) throw new Error('Failed to fetch product')
+      const data = await response.json()
+      return data.data || data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
   }
 )
 
@@ -94,14 +122,23 @@ const productsSlice = createSlice({
       })
       .addCase(searchProducts.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message
+        state.error = action.payload
+      })
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true
+        state.error = null
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.loading = false
         state.categories = action.payload
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message
+        state.error = action.payload
       })
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true
@@ -113,7 +150,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message
+        state.error = action.payload
       })
   }
 })

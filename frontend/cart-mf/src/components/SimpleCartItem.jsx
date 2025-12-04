@@ -1,20 +1,12 @@
 import React from 'react';
+import { useCart } from '../../../shared/hooks/useCart';
 
 const SimpleCartItem = ({ item }) => {
-  console.log('Rendering cart item:', item); // Add this line for debugging
+  const { removeItem, isRemoving } = useCart();
 
-  const handleRemove = async () => {
-    try {
-      const itemId = item._id || item.productId;
-      const response = await fetch(`http://localhost:5000/api/cart/items/${itemId}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) {
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Failed to remove item:', error);
-    }
+  const handleRemove = () => {
+    const itemId = item._id || item.productId;
+    removeItem(itemId);
   };
 
   // Safely get product details with better fallbacks
@@ -54,16 +46,18 @@ const SimpleCartItem = ({ item }) => {
         </p>
         <button 
           onClick={handleRemove}
+          disabled={isRemoving}
           style={{
             backgroundColor: '#dc3545',
             color: 'white',
             border: 'none',
             padding: '5px 10px',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: isRemoving ? 'not-allowed' : 'pointer',
+            opacity: isRemoving ? 0.6 : 1
           }}
         >
-          Remove
+          {isRemoving ? 'Removing...' : 'Remove'}
         </button>
       </div>
     </div>

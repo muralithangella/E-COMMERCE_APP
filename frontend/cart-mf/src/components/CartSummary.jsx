@@ -1,22 +1,15 @@
 import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { clearCart } from '../store/cartSlice'
 
-const CartSummary = () => {
+const CartSummary = ({ total = 0, itemCount = 0 }) => {
   const dispatch = useDispatch()
-  const { total, itemCount } = useSelector((state) => state.cart)
 
   const handleClearCart = async () => {
     try {
-      await fetch('http://localhost:5000/api/cart/clear', {
-        method: 'DELETE'
-      });
-      localStorage.removeItem('cart');
-      localStorage.removeItem('persist:cart');
-      dispatch(clearCart());
-      window.location.reload();
+      await dispatch(clearCart()).unwrap()
     } catch (error) {
-      console.error('Failed to clear cart:', error);
+      console.error('Failed to clear cart:', error)
     }
   }
 
@@ -25,6 +18,10 @@ const CartSummary = () => {
     window.dispatchEvent(new CustomEvent('navigate', { detail: '/checkout' }))
   }
 
+  const shipping = 0 // Free shipping for now
+  const tax = total * 0.08 // 8% tax
+  const finalTotal = total + shipping + tax
+
   return (
     <div className="cart-summary">
       <h3>Order Summary</h3>
@@ -32,13 +29,21 @@ const CartSummary = () => {
         <span>Items ({itemCount}):</span>
         <span>${total.toFixed(2)}</span>
       </div>
+      <div className="summary-line">
+        <span>Shipping:</span>
+        <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
+      </div>
+      <div className="summary-line">
+        <span>Tax:</span>
+        <span>${tax.toFixed(2)}</span>
+      </div>
       <div className="summary-line total">
         <span>Total:</span>
-        <span>${total.toFixed(2)}</span>
+        <span>${finalTotal.toFixed(2)}</span>
       </div>
       <div className="summary-actions">
         <button className="checkout-btn" onClick={handleCheckout}>
-          Proceed to Checkout
+          Proceed to Checkout (${finalTotal.toFixed(2)})
         </button>
         <button className="clear-btn" onClick={handleClearCart}>
           Clear Cart

@@ -280,33 +280,29 @@ const ProductsApp = () => {
                 
                 <div style={{ 
                   fontSize: '12px', 
-                  color: product.inStock ? '#007600' : '#B12704',
+                  color: '#007600',
                   marginTop: '4px'
                 }}>
-                  {product.inStock ? 
-                    `In Stock${product.stockCount ? ` (${product.stockCount} available)` : ''}` : 
-                    'Out of Stock'
-                  }
+                  In Stock
                 </div>
               </div>
 
               <button 
                 onClick={() => addToCart(product)}
-                disabled={!product.inStock}
                 style={{
                   width: '100%',
                   padding: '10px',
-                  backgroundColor: product.inStock ? '#ff9f00' : '#ccc',
-                  color: product.inStock ? '#000' : '#666',
+                  backgroundColor: '#ff9f00',
+                  color: '#000',
                   border: '1px solid #ff9f00',
                   borderRadius: '20px',
-                  cursor: product.inStock ? 'pointer' : 'not-allowed',
+                  cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
                   transition: 'background-color 0.2s'
                 }}
               >
-                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                Add to Cart
               </button>
             </div>
           ))}

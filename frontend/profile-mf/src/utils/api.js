@@ -1,24 +1,9 @@
-import axios from 'axios'
+export { default as api } from '../../../shared/services/api';
+export { ordersApi, useGetOrdersQuery } from '../../../shared/services/ordersApi';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
+// Legacy API for backward compatibility
 export const profileAPI = {
-  getProfile: () => api.get('/users/profile'),
-  updateProfile: (data) => api.put('/users/profile', data),
-  getOrderHistory: () => api.get('/orders/user'),
-}
+  getProfile: () => api.get('/api/users/profile'),
+  updateProfile: (data) => api.put('/api/users/profile', data),
+  getOrderHistory: () => api.get('/api/orders/user'),
+};

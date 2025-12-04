@@ -1,23 +1,10 @@
-import axios from 'axios'
-import { API_BASE_URL, AUTH_ENDPOINTS } from './constants'
+export { default as api } from '../../../shared/services/api';
+export { authApi, useLoginMutation, useRegisterMutation, useForgotPasswordMutation, useResetPasswordMutation } from '../../../shared/services/authApi';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
+// Legacy API for backward compatibility
 export const authAPI = {
-  login: (email, password) => 
-    api.post(AUTH_ENDPOINTS.LOGIN, { email, password }),
-  
-  register: (name, email, password) => 
-    api.post(AUTH_ENDPOINTS.REGISTER, { name, email, password }),
-  
-  forgotPassword: (email) => 
-    api.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, { email }),
-  
-  resetPassword: (token, password) => 
-    api.post(AUTH_ENDPOINTS.RESET_PASSWORD, { token, password })
-}
+  login: (email, password) => api.post('/api/auth/login', { email, password }),
+  register: (name, email, password) => api.post('/api/auth/register', { name, email, password }),
+  forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/api/auth/reset-password', { token, password })
+};

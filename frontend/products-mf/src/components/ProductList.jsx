@@ -1,56 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useProducts } from '../../../shared/hooks/useProducts';
+import { useCart } from '../../../shared/hooks/useCart';
 
-const addToCart = async (productId) => {
-  try {
-    console.log('Adding product to cart:', productId);
-    const response = await fetch('http://localhost:5000/api/cart/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ productId, quantity: 1 })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Added to cart successfully:', data);
-      alert('Product added to cart!');
-    } else {
-      console.error('Failed to add to cart');
-      alert('Failed to add to cart');
-    }
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    alert('Error adding to cart');
-  }
-};
-
-const ProductList = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/products');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('ProductList received data:', data);
-          const productsList = data.products || data.data || [];
-          console.log('Products to display:', productsList);
-          setProducts(productsList);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProducts();
-  }, []);
+const ProductList = ({ products = [], loading = false }) => {
+  const { addToCart, isAdding } = useCart();
 
   if (loading) return <div>Loading products...</div>;
+  if (!products.length) return <div>No products found</div>;
 
   return (
     <div style={{ padding: '20px' }}>
@@ -69,7 +25,7 @@ const ProductList = () => {
             textAlign: 'center'
           }}>
             <img
-              src={product.images?.[0] || `https://picsum.photos/200/150?random=${product._id}`}
+              src={product.image || `https://picsum.photos/200/150?random=${product._id}`}
               alt={product.name}
               style={{
                 width: '100%',
@@ -87,10 +43,8 @@ const ProductList = () => {
               {product.description}
             </p>
             <button
-              onClick={() => {
-                console.log('ProductList - Adding product:', product);
-                addToCart(product.id);
-              }}
+              onClick={() => addToCart(product.id)}
+              disabled={isAdding}
               style={{
                 backgroundColor: '#ff9f00',
                 color: 'white',
@@ -102,10 +56,8 @@ const ProductList = () => {
                 fontWeight: 'bold',
                 marginTop: '10px'
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#e68900'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#ff9f00'}
             >
-              Add to Cart (ID: {product.id})
+              {isAdding ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
         ))}

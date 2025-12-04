@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useCreateOrderMutation } from '../../../shared/services/ordersApi'
+import { useToast } from '../../../shared/hooks/useToast'
 import CheckoutSteps from '../components/CheckoutSteps'
 import ShippingForm from '../components/ShippingForm'
 import PaymentForm from '../components/PaymentForm'
 import OrderSummary from '../components/OrderSummary'
-import { setCurrentStep, processPayment, createOrder } from '../store/checkoutSlice'
 
 const CheckoutPage = () => {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { currentStep, isLoading, error, orderId } = useSelector(state => state.checkout)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [createOrder, { isLoading, error }] = useCreateOrderMutation()
+  const { showToast } = useToast()
 
   const handleStepChange = (step) => {
-    dispatch(setCurrentStep(step))
+    setCurrentStep(step)
   }
 
   const handlePlaceOrder = async () => {
     try {
-      const orderResult = await dispatch(createOrder()).unwrap()
+      const orderResult = await createOrder().unwrap()
+      showToast('Order placed successfully!', 'success')
       navigate(`/confirmation/${orderResult.orderId}`)
     } catch (error) {
-      console.error('Order failed:', error)
+      showToast('Order failed. Please try again.', 'error')
     }
   }
 
@@ -56,7 +58,7 @@ const CheckoutPage = () => {
       <div className="checkout-container">
         <h1>Checkout</h1>
         <CheckoutSteps currentStep={currentStep} />
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error.message}</div>}
         <div className="checkout-content">
           <div className="checkout-form">
             {renderStepContent()}

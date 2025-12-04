@@ -3,7 +3,7 @@ import { baseApi } from './baseApi';
 export const cartApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query({
-      query: () => '/cart',
+      query: () => ({ url: '/cart' }),
       providesTags: ['Cart'],
     }),
     
@@ -11,7 +11,7 @@ export const cartApi = baseApi.injectEndpoints({
       query: ({ productId, quantity = 1, variant }) => ({
         url: '/cart/add',
         method: 'POST',
-        body: { productId, quantity, variant }
+        data: { productId, quantity, variant }
       }),
       invalidatesTags: ['Cart'],
     }),
@@ -20,7 +20,7 @@ export const cartApi = baseApi.injectEndpoints({
       query: ({ itemId, quantity }) => ({
         url: `/cart/items/${itemId}`,
         method: 'PUT',
-        body: { quantity }
+        data: { quantity }
       }),
       invalidatesTags: ['Cart'],
     }),

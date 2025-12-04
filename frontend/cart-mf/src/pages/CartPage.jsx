@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { fetchCart } from '../store/cartSlice'
 import CartHeader from '../components/CartHeader'
 import CartItemList from '../components/CartItemList'
@@ -10,11 +10,11 @@ import ErrorMessage from '../components/ErrorMessage'
 
 const CartPage = () => {
   const dispatch = useDispatch()
-  const { items, loading, error } = useSelector((state) => state.cart)
+  const { items, total, count, loading, error } = useSelector(state => state.cart)
 
   useEffect(() => {
     dispatch(fetchCart())
-  }, [dispatch])
+  }, [])
 
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMessage message={error} />
@@ -22,10 +22,10 @@ const CartPage = () => {
 
   return (
     <div className="cart-page">
-      <CartHeader />
+      <CartHeader itemCount={count} />
       <div className="cart-content">
         <CartItemList items={items} />
-        <CartSummary />
+        <CartSummary total={total} itemCount={count} />
       </div>
     </div>
   )

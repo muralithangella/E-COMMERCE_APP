@@ -16,7 +16,7 @@ const CartItem = ({ item }) => {
     
     try {
       await dispatch(updateCartItem({
-        itemId: item._id,
+        itemId: item.id || item.productId,
         quantity: newQuantity
       })).unwrap();
     } catch (error) {
@@ -29,7 +29,7 @@ const CartItem = ({ item }) => {
   const handleRemove = async () => {
     setIsUpdating(true);
     try {
-      await dispatch(removeFromCart(item.productId)).unwrap();
+      await dispatch(removeFromCart(item.id || item.productId)).unwrap();
     } catch (error) {
       console.error('Failed to remove item:', error);
     } finally {

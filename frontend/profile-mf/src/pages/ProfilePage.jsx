@@ -1,21 +1,15 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { fetchProfile } from '../store/profileSlice'
+import { useGetProfileQuery } from '../../../shared/services/usersApi'
 import ProfileCard from '../components/ProfileCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 
 const ProfilePage = () => {
-  const dispatch = useDispatch()
-  const { user, loading, error } = useSelector((state) => state.profile)
+  const { data: user, isLoading, error } = useGetProfileQuery()
 
-  useEffect(() => {
-    dispatch(fetchProfile())
-  }, [dispatch])
-
-  if (loading) return <LoadingSpinner />
-  if (error) return <ErrorMessage message={error} />
+  if (isLoading) return <LoadingSpinner />
+  if (error) return <ErrorMessage message={error.message} />
 
   return (
     <div className="profile-page">

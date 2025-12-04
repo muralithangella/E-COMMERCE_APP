@@ -6,13 +6,13 @@ export const ordersApi = baseApi.injectEndpoints({
       query: (orderData) => ({
         url: '/orders',
         method: 'POST',
-        body: orderData,
+        data: orderData,
       }),
       invalidatesTags: ['Order'],
     }),
     
     getOrder: builder.query({
-      query: (orderId) => `/orders/${orderId}`,
+      query: (orderId) => ({ url: `/orders/${orderId}` }),
       providesTags: (result, error, id) => [{ type: 'Order', id }],
     }),
     
@@ -32,7 +32,7 @@ export const ordersApi = baseApi.injectEndpoints({
       query: ({ orderId, status }) => ({
         url: `/orders/${orderId}/status`,
         method: 'PATCH',
-        body: { status },
+        data: { status },
       }),
       invalidatesTags: (result, error, { orderId }) => [{ type: 'Order', id: orderId }],
     }),

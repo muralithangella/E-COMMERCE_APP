@@ -1,100 +1,47 @@
 import React from 'react';
 
 const ProductCard = ({ product }) => {
-
   const handleAddToCart = async () => {
-    if (!product._id) {
-      alert('Product ID missing');
-      return;
-    }
-    
     try {
       const response = await fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productId: product._id,
+          productId: product._id || product.id,
           name: product.name,
           price: product.price,
-          image: product.image,
           quantity: 1
         })
       });
       
       if (response.ok) {
         alert('Added to cart!');
-      } else {
-        const error = await response.json();
-        alert(`Failed: ${error.error}`);
       }
     } catch (error) {
-      alert('Network error');
+      alert('Error adding to cart');
     }
-  };
-
-  const getProductPrice = () => {
-    if (product.price?.sale && product.price.sale < product.price.regular) {
-      return (
-        <div className="price">
-          <span className="sale-price">${product.price.sale}</span>
-          <span className="regular-price">${product.price.regular}</span>
-        </div>
-      );
-    }
-    return <div className="price">${product.price?.regular || product.price}</div>;
-  };
-
-  const getProductImage = () => {
-    const primaryImage = product.images?.find(img => img.isPrimary);
-    return primaryImage?.url || product.images?.[0]?.url || '/placeholder-image.jpg';
-  };
-
-  const isOutOfStock = () => {
-    return product.inventory?.trackQuantity && product.inventory?.quantity === 0;
   };
 
   return (
     <div className="product-card">
       <div className="product-image">
         <img 
-          src={getProductImage()} 
+          src={product.image || product.images?.[0] || 'https://picsum.photos/300/200'} 
           alt={product.name}
-          loading="lazy"
         />
-        {product.featured && <span className="featured-badge">Featured</span>}
-        {isOutOfStock() && <span className="out-of-stock-badge">Out of Stock</span>}
       </div>
       
       <div className="product-info">
-        <h3 className="product-name">{product.name}</h3>
-        <p className="product-description">{product.shortDescription}</p>
-        
-        {product.brand && (
-          <div className="product-brand">{product.brand}</div>
-        )}
-        
-        {getProductPrice()}
-        
-        {product.ratings?.count > 0 && (
-          <div className="product-rating">
-            <span className="stars">{'★'.repeat(Math.floor(product.ratings.average))}</span>
-            <span className="rating-text">
-              {product.ratings.average.toFixed(1)} ({product.ratings.count} reviews)
-            </span>
-          </div>
-        )}
+        <h3>{product.name}</h3>
+        <p>{product.description}</p>
+        <div className="price">${product.price}</div>
         
         <div className="product-actions">
           <button 
             className="add-to-cart-btn"
             onClick={handleAddToCart}
-            disabled={isOutOfStock()}
           >
-            {isOutOfStock() ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-          
-          <button className="view-details-btn">
-            View Details
+            Add to Cart
           </button>
         </div>
       </div>

@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 
+const showToast = (message, type = 'success') => {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+    color: white;
+    border-radius: 4px;
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+};
+
 const addToCart = async (productId) => {
   try {
-    console.log('Adding product to cart:', productId);
     const response = await fetch('http://localhost:5000/api/cart/add', {
       method: 'POST',
       headers: {
@@ -12,16 +30,12 @@ const addToCart = async (productId) => {
     });
     
     if (response.ok) {
-      const data = await response.json();
-      console.log('Added to cart successfully:', data);
-      alert('Product added to cart!');
+      showToast('Product added to cart!');
     } else {
-      console.error('Failed to add to cart');
-      alert('Failed to add to cart');
+      showToast('Failed to add to cart', 'error');
     }
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    alert('Error adding to cart');
+    showToast('Error adding to cart', 'error');
   }
 };
 

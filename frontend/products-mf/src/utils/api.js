@@ -1,19 +1,10 @@
-import axios from 'axios'
+export { default as api } from '../../../shared/services/api';
+export { productsApi, useGetProductsQuery, useGetProductQuery, useSearchProductsQuery } from '../../../shared/services/productsApi';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
+// Legacy API for backward compatibility
 export const productsAPI = {
-  getProducts: () => api.get('/products'),
-  getProductById: (id) => api.get(`/products/${id}`),
-  getProductsByCategory: (category) => api.get(`/products/category/${category}`),
-  searchProducts: (query) => api.get(`/products/search?q=${query}`)
-}
-
-export default api
+  getProducts: (params) => api.get('/api/products', { params }),
+  getProductById: (id) => api.get(`/api/products/${id}`),
+  getProductsByCategory: (category) => api.get(`/api/products/category/${category}`),
+  searchProducts: (query) => api.get(`/api/products/search?q=${query}`)
+};

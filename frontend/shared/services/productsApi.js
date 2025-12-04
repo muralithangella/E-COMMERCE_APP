@@ -3,48 +3,35 @@ import { baseApi } from './baseApi';
 export const productsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: (params = {}) => ({
-        url: '/products',
-        params: {
-          page: params.page || 1,
-          limit: params.limit || 20,
-          category: params.category,
-          search: params.search,
-          minPrice: params.minPrice,
-          maxPrice: params.maxPrice,
-          sortBy: params.sortBy || 'createdAt',
-          sortOrder: params.sortOrder || 'desc'
-        }
-      }),
+      query: (params) => ({ url: '/products', params }),
       providesTags: ['Product'],
     }),
-    
     getProduct: builder.query({
-      query: (id) => `/products/${id}`,
+      query: (id) => ({ url: `/products/${id}` }),
       providesTags: (result, error, id) => [{ type: 'Product', id }],
     }),
-    
-    getFeaturedProducts: builder.query({
-      query: () => '/products/featured',
-      providesTags: ['Product'],
-    }),
-    
-    getDeals: builder.query({
-      query: () => '/products/deals',
-      providesTags: ['Product'],
-    }),
-    
-    getCategories: builder.query({
-      query: () => '/categories',
-      providesTags: ['Category'],
-    }),
-    
     searchProducts: builder.query({
-      query: (searchTerm) => ({
-        url: '/products/search',
-        params: { q: searchTerm }
+      query: ({ query, filters }) => ({ 
+        url: '/products', 
+        params: { search: query, ...filters } 
       }),
       providesTags: ['Product'],
+    }),
+    createProduct: builder.mutation({
+      query: (product) => ({ url: '/products', method: 'POST', data: product }),
+      invalidatesTags: ['Product'],
+    }),
+    updateProduct: builder.mutation({
+      query: ({ id, ...product }) => ({ 
+        url: `/products/${id}`, 
+        method: 'PUT', 
+        data: product 
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Product', id }],
+    }),
+    deleteProduct: builder.mutation({
+      query: (id) => ({ url: `/products/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Product'],
     }),
   }),
 });
@@ -52,8 +39,8 @@ export const productsApi = baseApi.injectEndpoints({
 export const {
   useGetProductsQuery,
   useGetProductQuery,
-  useGetFeaturedProductsQuery,
-  useGetDealsQuery,
-  useGetCategoriesQuery,
   useSearchProductsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
 } = productsApi;

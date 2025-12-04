@@ -45,17 +45,41 @@
   padding: 16px;
   border: 1px solid #eee;
   border-radius: 8px;
+  transition: opacity 0.2s;
+}
+
+.cart-item.updating {
+  opacity: 0.6;
 }
 
 .item-image {
   width: 80px;
   height: 80px;
-  object-fit: cover;
   border-radius: 4px;
+  overflow: hidden;
 }
 
-.item-details h3 {
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-details h4 {
   font-size: 16px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.item-brand {
+  color: #888;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.item-variant {
+  color: #666;
+  font-size: 12px;
   margin-bottom: 4px;
 }
 
@@ -64,35 +88,73 @@
   font-size: 14px;
 }
 
-.quantity-controls {
+.item-quantity {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.quantity-controls button {
+.quantity-btn {
   width: 32px;
   height: 32px;
   background: #f8f9fa;
   border: 1px solid #ddd;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.quantity-controls span {
-  min-width: 24px;
+.quantity-btn:hover:not(:disabled) {
+  background: #e9ecef;
+}
+
+.quantity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity-input {
+  width: 60px;
+  height: 32px;
   text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .item-total {
   font-weight: 600;
   font-size: 16px;
+  color: #333;
+}
+
+.item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .remove-btn {
   background: #dc3545;
   color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.remove-btn:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .cart-summary {
@@ -151,10 +213,15 @@
     gap: 12px;
   }
   
-  .quantity-controls,
+  .item-quantity,
   .item-total,
-  .remove-btn {
+  .item-actions {
     grid-column: 1 / -1;
     justify-self: start;
+    margin-top: 8px;
+  }
+  
+  .item-quantity {
+    justify-content: flex-start;
   }
 }
