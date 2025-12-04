@@ -1,176 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-const addToCart = async (product) => {
-  try {
-    console.log('Adding product to cart:', product);
-    console.log('Product._id:', product._id);
-    console.log('Product.id:', product.id);
-    console.log('Product keys:', Object.keys(product));
-    console.log('Product name:', product.name);
-    console.log('Product price:', product.price);
-    
-    if (!product || !product._id) {
-      console.error('Invalid product data:', product);
-      alert('Invalid product data!');
-      return;
-    }
-    
-    // Ensure all data is properly formatted
-    const cartData = {
-      productId: String(product._id || product.id || Date.now()),
-      quantity: 1,
-      name: String(product.name || 'Unknown Product'),
-      price: Number(product.price || 0),
-      image: String(product.image || 'https://via.placeholder.com/300x200')
-    };
-    
-    // Double check the data
-    if (!cartData.name || cartData.name === 'undefined') {
-      cartData.name = `${product.name || 'Product'} - ${product._id}`;
-    }
-    if (!cartData.price || isNaN(cartData.price)) {
-      cartData.price = Number(product.price) || 0;
-    }
-    
-    console.log('Product._id:', product._id);
-    console.log('Final cartData:', cartData);
-    
-    // Test with simple data first
-    if (!cartData.productId) {
-      alert('Product ID is missing!');
-      return;
-    }
-    console.log('Sending cart data:', cartData);
-    console.log('Sending cart data:', cartData);
-    
-    // Use URL parameters to bypass JSON issues
-    const params = new URLSearchParams({
-      productId: String(product._id),
-      quantity: '1',
-      name: String(product.name),
-      price: String(product.price),
-      image: String(product.image || 'https://via.placeholder.com/300x200')
-    });
-    
-    const response = await fetch('http://localhost:5000/api/cart/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params
-    });
-    
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Added to cart successfully:', data);
-      // Force refresh cart data
-      window.dispatchEvent(new CustomEvent('cartUpdated'));
-      alert('Product added to cart!');
-    } else {
-      const errorText = await response.text();
-      console.error('Failed to add to cart. Status:', response.status, 'Error:', errorText);
-      alert(`Failed to add to cart: ${response.status} - ${errorText}`);
-    }
-  } catch (error) {
-    console.error('Network error adding to cart:', error);
-    console.error('Error details:', error.message);
-    alert(`Network error: ${error.message}`);
-  }
-};
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+const ProductCard = ({ product, onAddToCart }) => (
+  <div className="product-card">
+    <img src={product.image} alt={product.name} />
+    <h3>{product.name}</h3>
+    <p className="price">${product.price}</p>
+    <button 
+      onClick={() => onAddToCart(product)}
+      disabled={!product.inStock}
+      className="add-to-cart-btn"
+    >
+      {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+    </button>
+  </div>
+);
 
 const App = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/products');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Products MF received:', data);
-          setProducts(data.products || []);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
-    
-    fetchProducts();
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/api/products`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      
+      const data = await response.json();
+      setProducts(data.products || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  const addToCart = useCallback(async (product) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/cart/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, quantity: 1 })
+      });
+      
+      if (!response.ok) throw new Error('Failed to add to cart');
+      
+      const result = await response.json();
+      alert(result.message);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  if (loading) return <div className="loading">Loading products...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div className="products-container">
       <h1>Products</h1>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: '20px',
-        marginTop: '20px'
-      }}>
+      <div className="products-grid">
         {products.map(product => (
-          <div key={product._id} style={{
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            padding: '15px',
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
-            <img 
-              src={product.image || 'https://via.placeholder.com/300x200'} 
-              alt={product.name}
-              style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '4px' }}
-            />
-            <h3 style={{ margin: '10px 0', color: '#333' }}>{product.name}</h3>
-            <p style={{ color: '#666', fontSize: '14px', margin: '5px 0' }}>{product.description}</p>
-            <p style={{ color: '#888', fontSize: '12px', margin: '5px 0' }}>Category: {product.category}</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
-              <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}>
-                ${product.price}
-              </span>
-              <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log('Button clicked, product:', product);
-                  console.log('Product keys:', Object.keys(product || {}));
-                  console.log('Product._id:', product?._id);
-                  console.log('Product.name:', product?.name);
-                  console.log('Product.price:', product?.price);
-                  
-                  if (!product || !product._id) {
-                    alert('Product data is missing!');
-                    return;
-                  }
-                  addToCart(product);
-                }}
-                style={{
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Add to Cart (ID: {product._id})
-              </button>
-            </div>
-          </div>
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            onAddToCart={addToCart}
+          />
         ))}
-      </div>
-      
-      <div style={{ 
-        marginTop: '30px', 
-        padding: '20px', 
-        backgroundColor: '#f8f9fa', 
-        borderRadius: '8px',
-        textAlign: 'center'
-      }}>
-        <h3>Product Summary</h3>
-        <p>Total Products: {products.length}</p>
       </div>
     </div>
   );

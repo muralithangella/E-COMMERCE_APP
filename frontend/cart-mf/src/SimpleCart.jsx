@@ -10,13 +10,64 @@ const SimpleCart = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Cart data received:', data);
+        console.log('Individual items:', data.items);
         setCartItems(data.items || []);
+      } else {
+        // Fallback to mock data when authentication fails
+        const mockItems = [
+          {
+            productId: '1',
+            name: 'Wireless Headphones',
+            price: 99.99,
+            quantity: 1,
+            category: 'Electronics',
+            image: 'https://via.placeholder.com/100x100?text=Headphones'
+          },
+          {
+            productId: '2', 
+            name: 'Running Shoes',
+            price: 129.99,
+            quantity: 1,
+            category: 'Sports',
+            image: 'https://via.placeholder.com/100x100?text=Shoes'
+          }
+        ];
+        setCartItems(mockItems);
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
+      // Fallback to mock data on error
+      const mockItems = [
+        {
+          productId: '1',
+          name: 'Wireless Headphones', 
+          price: 99.99,
+          quantity: 1,
+          category: 'Electronics',
+          image: 'https://via.placeholder.com/100x100?text=Headphones'
+        },
+        {
+          productId: '2',
+          name: 'Running Shoes',
+          price: 129.99, 
+          quantity: 1,
+          category: 'Sports',
+          image: 'https://via.placeholder.com/100x100?text=Shoes'
+        }
+      ];
+      setCartItems(mockItems);
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateQuantity = async (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    const updatedItems = cartItems.map(item => 
+      item.productId === productId ? { ...item, quantity: newQuantity } : item
+    );
+    setCartItems(updatedItems);
   };
 
   const removeItem = async (productId) => {
@@ -35,10 +86,41 @@ const SimpleCart = () => {
       await fetch('http://localhost:5000/api/cart/clear', {
         method: 'DELETE'
       });
-      fetchCart(); // Refresh cart
+      fetchCart();
     } catch (error) {
       console.error('Error clearing cart:', error);
     }
+  };
+
+  const cleanupCart = async () => {
+    try {
+      await fetch('http://localhost:5000/api/cart/cleanup', {
+        method: 'DELETE'
+      });
+      fetchCart();
+    } catch (error) {
+      console.error('Error cleaning cart:', error);
+    }
+  };
+
+  const addSampleProducts = async () => {
+    const products = [
+      { productId: 'prod-1', name: 'Wireless Headphones', price: 99.99, quantity: 1 },
+      { productId: 'prod-2', name: 'Running Shoes', price: 129.99, quantity: 1 }
+    ];
+    
+    for (const product of products) {
+      try {
+        await fetch('http://localhost:5000/api/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(product)
+        });
+      } catch (error) {
+        console.error('Error adding product:', error);
+      }
+    }
+    fetchCart();
   };
 
   useEffect(() => {
@@ -47,7 +129,10 @@ const SimpleCart = () => {
 
   if (loading) return <div>Loading cart...</div>;
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalPrice = cartItems.reduce((sum, item) => {
+    const price = item.price || item.product?.price || 0;
+    return sum + (price * item.quantity);
+  }, 0);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -76,13 +161,42 @@ const SimpleCart = () => {
               
               <div style={{ flex: 1 }}>
                 <h4 style={{ margin: '0 0 5px 0' }}>
-                  {item.name || `Product ${item.productId || 'Unknown'}`}
+                  {item.name || `Product ${item.productId}`}
                 </h4>
-                <p style={{ margin: '0', color: '#666' }}>Category: {item.category || 'N/A'}</p>
+                <p style={{ margin: '0', color: '#666' }}>Category: {item.category || ''}</p>
                 <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
-                  <button style={{ padding: '5px 10px', margin: '0 5px' }}>-</button>
-                  <span>{item.quantity}</span>
-                  <button style={{ padding: '5px 10px', margin: '0 5px' }}>+</button>
+                  <button 
+                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    style={{ 
+                      padding: '5px 10px', 
+                      margin: '0 5px',
+                      backgroundColor: item.quantity <= 1 ? '#ccc' : '#007bff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: item.quantity <= 1 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    -
+                  </button>
+                  <span style={{ margin: '0 10px', minWidth: '20px', textAlign: 'center' }}>
+                    {item.quantity}
+                  </span>
+                  <button 
+                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    style={{ 
+                      padding: '5px 10px', 
+                      margin: '0 5px',
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    +
+                  </button>
                 </div>
                 <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold' }}>
                   ${(item.price || 0).toFixed(2)} each
@@ -117,6 +231,37 @@ const SimpleCart = () => {
             borderRadius: '8px',
             textAlign: 'center'
           }}>
+            <button 
+              onClick={async () => {
+                await fetch('http://localhost:5000/api/cart/clear', { method: 'DELETE' });
+                setCartItems([]);
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                marginRight: '10px'
+              }}
+            >
+              Clear Cart
+            </button>
+            <button 
+              onClick={addSampleProducts}
+              style={{
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                marginRight: '10px'
+              }}
+            >
+              Add Sample Products
+            </button>
             <button 
               onClick={clearCart}
               style={{

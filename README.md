@@ -1,188 +1,79 @@
-# E-Commerce Microservices & Micro-Frontend Architecture
+# Clean E-Commerce Application
 
-## Architecture Overview
+A modern, scalable e-commerce application built with microservices architecture.
 
-### Backend - Microservices Architecture
-- **API Gateway** (Port 5000) - Routes requests to appropriate microservices
-- **Auth Service** (Port 3001) - User authentication and authorization
-- **Products Service** (Port 3002) - Product catalog management
-- **Orders Service** (Port 3003) - Order processing and management
-- **Payments Service** (Port 3004) - Payment processing integration
-- **Inventory Service** (Port 3005) - Stock management and tracking
-- **Notifications Service** (Port 3006) - Email/SMS notifications
-- **Users Service** (Port 3007) - User profile management
+## Features
 
-### Frontend - Micro-Frontend Architecture
-- **Shell Application** (Port 3000) - Main container and routing
-- **Auth Micro-Frontend** (Port 3001) - Login/Register components
-- **Products Micro-Frontend** (Port 3002) - Product listing and details
-- **Cart Micro-Frontend** (Port 3003) - Shopping cart functionality
-- **Checkout Micro-Frontend** (Port 3004) - Checkout process
-- **Profile Micro-Frontend** (Port 3005) - User profile management
+✅ **Clean Architecture** - Minimal, maintainable code  
+✅ **Security** - Helmet, CORS, Rate limiting  
+✅ **Performance** - Compression, optimized React components  
+✅ **Scalable** - Microservices ready  
+✅ **Robust** - Error handling, loading states  
 
-### Database Architecture
-- **MongoDB** - Primary database with replica sets and sharding
-  - Products DB - Product catalog data
-  - Orders DB - Order and transaction data
-  - Users DB - User profiles and authentication
-- **Redis** - Caching and session management
-- **Oracle** - Legacy system integration (optional)
+## Quick Start
 
-### Message Queue
-- **Apache Kafka** - Event-driven communication between services
-
-## Project Structure
-
-```
-ecommerce-app/
-├── backend/
-│   ├── gateway.js                 # API Gateway
-│   ├── config/
-│   │   ├── database.js           # Database connections
-│   │   └── kafka.js              # Kafka configuration
-│   ├── src/
-│   │   ├── auth/                 # Authentication Service
-│   │   │   ├── server.js
-│   │   │   ├── controllers/
-│   │   │   ├── models/
-│   │   │   └── routes/
-│   │   ├── products/             # Products Service
-│   │   ├── orders/               # Orders Service
-│   │   ├── payments/             # Payments Service
-│   │   ├── inventory/            # Inventory Service
-│   │   ├── notifications/        # Notifications Service
-│   │   └── users/                # Users Service
-│   ├── middleware/               # Shared middleware
-│   ├── utils/                    # Shared utilities
-│   └── docker-compose.yml        # Container orchestration
-├── frontend/
-│   ├── shell/                    # Main Shell Application
-│   │   ├── src/
-│   │   ├── webpack.config.js     # Module Federation config
-│   │   └── package.json
-│   ├── auth-mf/                  # Auth Micro-Frontend
-│   ├── products-mf/              # Products Micro-Frontend
-│   ├── cart-mf/                  # Cart Micro-Frontend
-│   ├── checkout-mf/              # Checkout Micro-Frontend
-│   ├── profile-mf/               # Profile Micro-Frontend
-│   └── shared/                   # Shared components and services
-└── shared/                       # Shared types and utilities
-    ├── types/
-    ├── utils/
-    └── constants/
-```
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- Docker & Docker Compose
-- MongoDB
-- Redis
-- Apache Kafka
-
-### Backend Setup
-
-1. **Start Infrastructure Services**
+1. **Install dependencies**
 ```bash
-cd backend
-docker-compose up -d mongodb redis kafka zookeeper
+npm run install:all
 ```
 
-2. **Install Dependencies**
+2. **Start backend**
 ```bash
-npm install
-```
-
-3. **Start Microservices**
-```bash
-# Start all services
-npm run start:all
-
-# Or start individual services
-npm run start:auth
-npm run start:products
-npm run start:orders
-# etc.
-```
-
-### Frontend Setup
-
-1. **Install Shell Application**
-```bash
-cd frontend/shell
-npm install
 npm start
 ```
 
-2. **Start Micro-Frontends**
+3. **Start frontend services** (in separate terminals)
 ```bash
-# In separate terminals
-cd frontend/auth-mf && npm install && npm start
-cd frontend/products-mf && npm install && npm start
-cd frontend/cart-mf && npm install && npm start
-cd frontend/checkout-mf && npm install && npm start
-cd frontend/profile-mf && npm install && npm start
+npm run start:products
+npm run start:cart
 ```
 
-## Key Features
+## API Endpoints
 
-### Backend Features
-- **Microservices Architecture** - Independent, scalable services
-- **API Gateway** - Centralized routing and load balancing
-- **Event-Driven Communication** - Kafka for async messaging
-- **Database Sharding** - Horizontal scaling with MongoDB
-- **Caching Layer** - Redis for performance optimization
-- **Authentication & Authorization** - JWT-based security
-- **Rate Limiting** - Protection against abuse
-- **Health Monitoring** - Service health checks
+- `GET /api/products` - Get all products
+- `GET /api/categories` - Get categories
+- `GET /api/cart` - Get cart items
+- `POST /api/cart/add` - Add item to cart
+- `PUT /api/cart/items/:id` - Update cart item
+- `DELETE /api/cart/items/:id` - Remove cart item
+- `DELETE /api/cart/clear` - Clear cart
 
-### Frontend Features
-- **Micro-Frontend Architecture** - Independent deployable frontends
-- **Module Federation** - Runtime code sharing
-- **Shared State Management** - Redux for cross-MF communication
-- **Component Library** - Reusable UI components
-- **Lazy Loading** - Performance optimization
-- **Error Boundaries** - Graceful error handling
+## Architecture
 
-## Development Guidelines
-
-### Backend
-- Each microservice is independently deployable
-- Use event-driven communication for loose coupling
-- Implement circuit breakers for resilience
-- Follow RESTful API design principles
-- Use proper error handling and logging
-
-### Frontend
-- Each micro-frontend owns its domain
-- Share common dependencies through Module Federation
-- Use shared state for cross-MF communication
-- Implement proper error boundaries
-- Follow consistent UI/UX patterns
-
-## Deployment
-
-### Docker Deployment
-```bash
-docker-compose up --build
+```
+├── backend/
+│   └── server.js          # Clean API server
+├── frontend/
+│   ├── products-mf/       # Products micro-frontend
+│   └── cart-mf/           # Cart micro-frontend
+└── package.json           # Root dependencies
 ```
 
-### Kubernetes Deployment
+## Production Deployment
+
+1. Set environment variables:
+   - `NODE_ENV=production`
+   - `PORT=5000`
+   - `REACT_APP_API_URL=https://your-api-domain.com`
+
+2. Build and deploy:
 ```bash
-kubectl apply -f k8s/
+npm run build
+npm start
 ```
 
-## Monitoring & Observability
-- Health check endpoints for all services
-- Centralized logging with structured logs
-- Metrics collection and monitoring
-- Distributed tracing for request flows
+## Security Features
 
-## Security
-- JWT-based authentication
-- Role-based access control
-- Input validation and sanitization
-- Rate limiting and DDoS protection
-- HTTPS enforcement
-- Security headers with Helmet.js
+- Helmet.js for security headers
+- CORS protection
+- Rate limiting (100 requests/15min)
+- Input validation
+- Error handling
+
+## Performance Features
+
+- Gzip compression
+- React.memo optimization
+- useCallback hooks
+- Minimal re-renders
+- Efficient state management

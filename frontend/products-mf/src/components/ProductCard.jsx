@@ -1,18 +1,35 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../../../cart-mf/src/store/cartSlice';
 
 const ProductCard = ({ product }) => {
-  const dispatch = useDispatch();
 
-  const handleAddToCart = () => {
-    dispatch(addToCart({
-      product: {  // Pass the complete product object
-        ...product,
-        price: product.price?.sale || product.price?.regular || product.price
-      },
-      quantity: 1
-    }));
+  const handleAddToCart = async () => {
+    if (!product._id) {
+      alert('Product ID missing');
+      return;
+    }
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1
+        })
+      });
+      
+      if (response.ok) {
+        alert('Added to cart!');
+      } else {
+        const error = await response.json();
+        alert(`Failed: ${error.error}`);
+      }
+    } catch (error) {
+      alert('Network error');
+    }
   };
 
   const getProductPrice = () => {

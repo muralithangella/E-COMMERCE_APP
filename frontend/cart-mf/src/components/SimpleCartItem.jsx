@@ -1,7 +1,5 @@
 import React from 'react';
 
-import React from 'react';
-
 const SimpleCartItem = ({ item }) => {
   console.log('Rendering cart item:', item); // Add this line for debugging
 

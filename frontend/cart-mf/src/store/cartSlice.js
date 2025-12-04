@@ -1,38 +1,47 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 export const addToCart = createAsyncThunk(
   'cart/addToCart',
-  async ({ product, quantity = 1, variant = null }, { rejectWithValue }) => {
+  async ({ product, quantity = 1 }, { rejectWithValue }) => {
     try {
-      // Ensure we have the product details
-      if (!product || !product._id) {
-        throw new Error('Invalid product data');
-      }
-
       const response = await fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productId: product._id,
-          name: product.name || 'Unknown Product',
-          price: product.price?.sale || product.price?.regular || product.price || 0,
-          image: product.images?.[0]?.url || 'https://via.placeholder.com/300x200',
-          quantity: parseInt(quantity, 10),
-          variant,
-        }),
+          productId: product._id || product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity
+        })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add item to cart');
-      }
-
-      const data = await response.json();
-      console.log('Add to cart response:', data);
-      return data;
+      if (!response.ok) throw new Error('Failed to add to cart');
+      return await response.json();
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      return rejectWithValue(error.message || 'Failed to add item to cart');
+      return rejectWithValue(error.message);
     }
   }
 );
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState: { items: [], loading: false, error: null },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(addToCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addToCart.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(addToCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  }
+});
+
+export default cartSlice.reducer;

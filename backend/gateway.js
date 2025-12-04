@@ -12,7 +12,7 @@ const PORT = process.env.GATEWAY_PORT || 5000;
 app.use(compression());
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003', 'http://localhost:4004', 'http://localhost:4005'],
+  origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003', 'http://localhost:4004', 'http://localhost:4005'],
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
@@ -126,6 +126,12 @@ app.post('/api/auth/test-direct', (req, res) => {
 
 // Simple cart implementation (no auth required)
 let cartItems = [];
+console.log('Gateway started - cart initialized as empty array');
+
+// Debug function to log cart state
+const logCartState = () => {
+  console.log('Current cart items:', cartItems.map(item => ({ id: item.productId, name: item.name, qty: item.quantity })));
+};
 
 // Test endpoint to debug request body
 app.post('/api/test', (req, res) => {
@@ -135,49 +141,27 @@ app.post('/api/test', (req, res) => {
 });
 
 app.post('/api/cart/add', (req, res) => {
-  console.log('=== CART ADD DEBUG ===');
-  console.log('Raw body:', req.body);
-  console.log('Body type:', typeof req.body);
-  console.log('Body keys:', Object.keys(req.body || {}));
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Body string:', JSON.stringify(req.body));
-  
   const { productId, quantity = 1, name, price, image } = req.body;
-  console.log('Extracted:', { productId, quantity, name, price, image });
   
-  // Allow empty productId for now
-  console.log('ProductId check:', productId, 'Type:', typeof productId);
+  const existingItemIndex = cartItems.findIndex(item => item.productId === productId);
   
-  const existingItem = cartItems.find(item => item.productId === productId);
-  
-  if (existingItem) {
-    existingItem.quantity += quantity;
-    console.log('Updated existing item:', existingItem);
+  if (existingItemIndex !== -1) {
+    cartItems[existingItemIndex].quantity += 1;
   } else {
-    const newItem = { 
-      productId: String(productId), 
-      quantity: parseInt(quantity) || 1, 
-      name: String(name || `Product ${productId}`),
-      price: parseFloat(price) || 0,
-      image: String(image || 'https://via.placeholder.com/300x200'),
-      addedAt: new Date() 
-    };
-    cartItems.push(newItem);
-    console.log('Added new item:', newItem);
+    cartItems.push({ 
+      productId,
+      quantity: 1,
+      name,
+      price: parseFloat(price),
+      image: image || 'https://via.placeholder.com/300x200'
+    });
   }
   
-  console.log('Current cart:', cartItems);
-  console.log('======================');
-  
-  res.json({ 
-    success: true, 
-    message: 'Product added to cart successfully',
-    cartItems: cartItems.length,
-    item: cartItems[cartItems.length - 1]
-  });
+  res.json({ success: true, message: 'Added to cart', items: cartItems });
 });
 
 app.get('/api/cart', (req, res) => {
+  logCartState();
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
@@ -189,8 +173,22 @@ app.get('/api/cart', (req, res) => {
   });
 });
 
+app.get('/api/cart/debug', (req, res) => {
+  res.json({
+    cartItems: cartItems.map(item => ({
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity
+    })),
+    uniqueProducts: [...new Set(cartItems.map(item => item.productId))].length,
+    totalItems: cartItems.length
+  });
+});
+
 app.delete('/api/cart/clear', (req, res) => {
-  cartItems.splice(0, cartItems.length);
+  cartItems.length = 0;
+  console.log('Cart cleared, length:', cartItems.length);
   res.json({ success: true, message: 'Cart cleared', items: [] });
 });
 
@@ -198,6 +196,19 @@ app.delete('/api/cart/:productId', (req, res) => {
   const { productId } = req.params;
   cartItems = cartItems.filter(item => item.productId !== productId);
   res.json({ success: true, items: cartItems });
+});
+
+app.delete('/api/cart/cleanup', (req, res) => {
+  // Remove duplicates and invalid items
+  const seen = new Set();
+  cartItems = cartItems.filter(item => {
+    if (!item.productId || item.productId === 'undefined' || seen.has(item.productId)) {
+      return false;
+    }
+    seen.add(item.productId);
+    return true;
+  });
+  res.json({ success: true, message: 'Duplicates and invalid items removed', items: cartItems });
 });
 
 // Health check
