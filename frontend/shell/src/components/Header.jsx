@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -275,10 +276,10 @@ const Header = () => {
                   setShowLoginForm(false);
                   window.location.reload();
                 } else {
-                  alert('Login failed');
+                  toast.error('Login failed');
                 }
               } catch (error) {
-                alert('Login error');
+                toast.error('Login error');
               }
             }}>
               <div style={{ marginBottom: '1rem' }}>

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 import { clearCart } from '../store/slices/cartSlice';
+import OrderService from '../services/orderService';
+import ProductService from '../services/productService';
 
 const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
@@ -68,59 +71,42 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     setLoading(true);
-    console.log('🛒 Starting order placement...');
     
     try {
-      // Add delay to show loading
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const orderId = Date.now().toString();
+      const orderId = OrderService.generateOrderId();
+      const totals = OrderService.calculateOrderTotals(cartItems);
       
       const order = {
         id: orderId,
         items: cartItems,
         shippingAddress: orderData.shippingAddress,
-        paymentMethod: { ...orderData.paymentMethod, cardNumber: '**** **** **** ' + orderData.paymentMethod.cardNumber.slice(-4) },
-        subtotal,
-        shipping,
-        tax,
-        total,
+        paymentMethod: { 
+          ...orderData.paymentMethod, 
+          cardNumber: '**** **** **** ' + orderData.paymentMethod.cardNumber.slice(-4) 
+        },
+        ...totals,
         status: 'confirmed',
         orderDate: new Date().toISOString(),
-        estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        estimatedDelivery: OrderService.getEstimatedDeliveryDate(),
         userEmail: orderData.shippingAddress.email || 'customer@example.com',
         userPhone: orderData.shippingAddress.phone
       };
       
-      console.log('📦 Order created:', order);
-      
-      // Submit order to backend API for notifications
+      // Submit order to backend
       try {
-        const response = await fetch('http://localhost:3008/api/orders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(order)
-        });
-        
-        if (response.ok) {
-          console.log('✅ Order submitted to backend - notifications will be sent');
-        } else {
-          console.warn('⚠️ Backend response not OK:', response.status);
-        }
+        await OrderService.createOrder(order);
+        console.log('✅ Order submitted to backend successfully');
       } catch (apiError) {
-        console.warn('⚠️ Backend API unavailable:', apiError.message);
+        console.warn('⚠️ Backend API unavailable, saving locally:', apiError.message);
       }
 
       localStorage.setItem('lastOrder', JSON.stringify(order));
       dispatch(clearCart());
       
-      console.log('🎉 Redirecting to order confirmation...');
       window.location.href = `/order-confirmation?orderId=${order.id}`;
     } catch (error) {
       console.error('❌ Order placement failed:', error);
-      alert('Order failed. Please try again.');
+      toast.error('Order failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -556,15 +542,15 @@ const CheckoutPage = () => {
               <div style={{ borderTop: '2px solid #eee', paddingTop: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span>Subtotal:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{ProductService.formatPrice(subtotal)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span>Shipping:</span>
-                  <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? 'FREE' : ProductService.formatPrice(shipping)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span>Tax:</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{ProductService.formatPrice(tax)}</span>
                 </div>
                 <div style={{
                   display: 'flex',
@@ -575,7 +561,7 @@ const CheckoutPage = () => {
                   paddingTop: '8px'
                 }}>
                   <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{ProductService.formatPrice(total)}</span>
                 </div>
               </div>
             </div>

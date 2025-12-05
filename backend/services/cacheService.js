@@ -1,20 +1,39 @@
-const DatabaseManager = require('../config/database');
+const Redis = require('ioredis');
 
 class CacheService {
   constructor() {
-    this.defaultTTL = 300; // 5 minutes
+    this.redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: process.env.REDIS_PORT || 6379,
+      retryDelayOnFailover: 100,
+      maxRetriesPerRequest: 3,
+      lazyConnect: true
+    });
+
+    this.defaultTTL = 3600; // 1 hour
+    this.keyPrefix = 'ecommerce:';
+    
+    this.setupEventHandlers();
   }
 
-  getRedisClient() {
-    return DatabaseManager.getRedisClient();
+  setupEventHandlers() {
+    this.redis.on('connect', () => {
+      console.log('✅ Cache service connected');
+    });
+
+    this.redis.on('error', (error) => {
+      console.error('❌ Cache service error:', error);
+    });
   }
 
-  async get(key) {
+  generateKey(namespace, identifier) {
+    return `${this.keyPrefix}${namespace}:${identifier}`;
+  }
+
+  async get(key, namespace = 'default') {
     try {
-      const client = this.getRedisClient();
-      if (!client) return null;
-
-      const value = await client.get(key);
+      const fullKey = this.generateKey(namespace, key);
+      const value = await this.redis.get(fullKey);
       return value ? JSON.parse(value) : null;
     } catch (error) {
       console.error('Cache get error:', error);
@@ -22,12 +41,10 @@ class CacheService {
     }
   }
 
-  async set(key, value, ttl = this.defaultTTL) {
+  async set(key, value, ttl = this.defaultTTL, namespace = 'default') {
     try {
-      const client = this.getRedisClient();
-      if (!client) return false;
-
-      await client.setex(key, ttl, JSON.stringify(value));
+      const fullKey = this.generateKey(namespace, key);
+      await this.redis.setex(fullKey, ttl, JSON.stringify(value));
       return true;
     } catch (error) {
       console.error('Cache set error:', error);
@@ -35,12 +52,10 @@ class CacheService {
     }
   }
 
-  async del(key) {
+  async del(key, namespace = 'default') {
     try {
-      const client = this.getRedisClient();
-      if (!client) return false;
-
-      await client.del(key);
+      const fullKey = this.generateKey(namespace, key);
+      await this.redis.del(fullKey);
       return true;
     } catch (error) {
       console.error('Cache delete error:', error);
@@ -48,132 +63,128 @@ class CacheService {
     }
   }
 
-  async invalidatePattern(pattern) {
+  async exists(key, namespace = 'default') {
     try {
-      const client = this.getRedisClient();
-      if (!client) return false;
-
-      const keys = await client.keys(pattern);
-      if (keys.length > 0) {
-        await client.del(keys);
-      }
-      return true;
+      const fullKey = this.generateKey(namespace, key);
+      return await this.redis.exists(fullKey);
     } catch (error) {
-      console.error('Cache invalidate pattern error:', error);
+      console.error('Cache exists error:', error);
       return false;
     }
   }
 
-  // Product cache methods
-  async cacheProduct(productId, product, ttl = 600) {
-    return this.set(`product:${productId}`, product, ttl);
+  async invalidatePattern(pattern, namespace = 'default') {
+    try {
+      const fullPattern = this.generateKey(namespace, pattern);
+      const keys = await this.redis.keys(fullPattern);
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+      }
+      return keys.length;
+    } catch (error) {
+      console.error('Cache invalidate pattern error:', error);
+      return 0;
+    }
+  }
+
+  // Product-specific caching methods
+  async cacheProduct(productId, productData, ttl = 7200) {
+    return await this.set(productId, productData, ttl, 'products');
   }
 
   async getCachedProduct(productId) {
-    return this.get(`product:${productId}`);
+    return await this.get(productId, 'products');
   }
 
-  async invalidateProductCache(productId) {
-    await this.del(`product:${productId}`);
-    await this.invalidatePattern(`products:*`);
+  async cacheProductList(filters, products, ttl = 1800) {
+    const key = this.generateFiltersKey(filters);
+    return await this.set(key, products, ttl, 'product-lists');
   }
 
-  // Category cache methods
-  async cacheCategories(categories, ttl = 1800) {
-    return this.set('categories:all', categories, ttl);
+  async getCachedProductList(filters) {
+    const key = this.generateFiltersKey(filters);
+    return await this.get(key, 'product-lists');
   }
 
-  async getCachedCategories() {
-    return this.get('categories:all');
-  }
-
-  async invalidateCategoryCache() {
-    await this.invalidatePattern('categories:*');
-    await this.invalidatePattern('products:*');
-  }
-
-  // User session cache
-  async cacheUserSession(userId, sessionData, ttl = 3600) {
-    return this.set(`session:${userId}`, sessionData, ttl);
-  }
-
-  async getCachedUserSession(userId) {
-    return this.get(`session:${userId}`);
-  }
-
-  async invalidateUserSession(userId) {
-    return this.del(`session:${userId}`);
-  }
-
-  // Cart cache methods
-  async cacheCart(userId, cart, ttl = 1800) {
-    return this.set(`cart:${userId}`, cart, ttl);
-  }
-
-  async getCachedCart(userId) {
-    return this.get(`cart:${userId}`);
-  }
-
-  async invalidateCartCache(userId) {
-    return this.del(`cart:${userId}`);
-  }
-
-  // Search results cache
-  async cacheSearchResults(query, filters, results, ttl = 300) {
-    const key = `search:${this.generateSearchKey(query, filters)}`;
-    return this.set(key, results, ttl);
-  }
-
-  async getCachedSearchResults(query, filters) {
-    const key = `search:${this.generateSearchKey(query, filters)}`;
-    return this.get(key);
-  }
-
-  generateSearchKey(query, filters) {
-    const filterString = Object.keys(filters)
+  generateFiltersKey(filters) {
+    return Object.keys(filters)
       .sort()
       .map(key => `${key}:${filters[key]}`)
       .join('|');
-    
-    return Buffer.from(`${query}|${filterString}`).toString('base64');
   }
 
-  // Analytics cache
-  async cacheDashboardStats(stats, ttl = 900) {
-    return this.set('dashboard:stats', stats, ttl);
+  // User session caching
+  async cacheUserSession(userId, sessionData, ttl = 86400) {
+    return await this.set(userId, sessionData, ttl, 'sessions');
   }
 
-  async getCachedDashboardStats() {
-    return this.get('dashboard:stats');
+  async getCachedUserSession(userId) {
+    return await this.get(userId, 'sessions');
   }
 
-  async invalidateDashboardCache() {
-    await this.invalidatePattern('dashboard:*');
+  // Cart caching
+  async cacheCart(userId, cartData, ttl = 3600) {
+    return await this.set(userId, cartData, ttl, 'carts');
   }
 
-  // Rate limiting helpers
-  async incrementRateLimit(key, windowMs, maxRequests) {
+  async getCachedCart(userId) {
+    return await this.get(userId, 'carts');
+  }
+
+  // Rate limiting
+  async checkRateLimit(identifier, limit = 100, window = 900) {
     try {
-      const client = this.getRedisClient();
-      if (!client) return { count: 1, remaining: maxRequests - 1 };
-
-      const current = await client.incr(key);
+      const key = this.generateKey('rate-limit', identifier);
+      const current = await this.redis.incr(key);
       
       if (current === 1) {
-        await client.expire(key, Math.ceil(windowMs / 1000));
+        await this.redis.expire(key, window);
       }
-
-      const remaining = Math.max(0, maxRequests - current);
       
       return {
-        count: current,
-        remaining,
-        exceeded: current > maxRequests
+        allowed: current <= limit,
+        current,
+        limit,
+        resetTime: await this.redis.ttl(key)
       };
     } catch (error) {
-      console.error('Rate limit increment error:', error);
-      return { count: 1, remaining: maxRequests - 1, exceeded: false };
+      console.error('Rate limit check error:', error);
+      return { allowed: true, current: 0, limit, resetTime: window };
     }
+  }
+
+  async getStats() {
+    try {
+      const info = await this.redis.info('memory');
+      const keyspace = await this.redis.info('keyspace');
+      
+      return {
+        memory: this.parseRedisInfo(info),
+        keyspace: this.parseRedisInfo(keyspace),
+        connected: this.redis.status === 'ready'
+      };
+    } catch (error) {
+      console.error('Cache stats error:', error);
+      return { connected: false };
+    }
+  }
+
+  parseRedisInfo(info) {
+    const lines = info.split('\r\n');
+    const result = {};
+    
+    lines.forEach(line => {
+      if (line.includes(':')) {
+        const [key, value] = line.split(':');
+        result[key] = value;
+      }
+    });
+    
+    return result;
+  }
+
+  async disconnect() {
+    await this.redis.disconnect();
   }
 }
 

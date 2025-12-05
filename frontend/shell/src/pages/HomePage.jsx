@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetProductsQuery, useGetCategoriesQuery } from '../store/api/apiSlice';
+import { useGetProductsQuery, useGetCategoriesQuery, useGetDealsQuery, useGetRecommendationsQuery } from '../store/api/apiSlice';
 import { useAdvancedFilters } from '../hooks/useAdvancedFilters';
 import HeroBanner from '../components/HeroBanner';
 import CategoryGrid from '../components/CategoryGrid';
@@ -37,11 +37,12 @@ const HomePage = () => {
   const {
     data: dealsData,
     isLoading: dealsLoading
-  } = useGetProductsQuery({ 
-    sort: 'discount',
-    minDiscount: 20,
-    limit: 8 
-  });
+  } = useGetDealsQuery();
+  
+  const {
+    data: recommendationsData,
+    isLoading: recommendationsLoading
+  } = useGetRecommendationsQuery();
 
   const handleProductClick = useCallback((productId) => {
     navigate(`/products/${productId}`);
@@ -92,15 +93,16 @@ const HomePage = () => {
       <section className={styles.section}>
         <ProductCarousel
           title="Recommended for you"
-          products={productsData || []}
+          products={recommendationsData || []}
           onProductClick={handleProductClick}
+          loading={recommendationsLoading}
         />
       </section>
 
       <section className={styles.section}>
         <ProductCarousel
-          title="Recently viewed"
-          products={(productsData || []).slice(0, 8)}
+          title="Featured Products"
+          products={productsData || []}
           onProductClick={handleProductClick}
         />
       </section>

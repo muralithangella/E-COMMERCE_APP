@@ -1,4 +1,5 @@
 import React, { Suspense, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const AuthApp = React.lazy(() => import('auth/AuthApp').catch(() => ({ default: () => <SimpleLoginForm /> })));
 
@@ -24,10 +25,10 @@ const SimpleLoginForm = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
         window.location.href = '/';
       } else {
-        alert('Login failed');
+        toast.error('Login failed');
       }
     } catch (error) {
-      alert('Login error');
+      toast.error('Login error');
     } finally {
       setLoading(false);
     }

@@ -1,131 +1,149 @@
 const nodemailer = require('nodemailer');
-const KafkaManager = require('../config/kafka');
+const handlebars = require('handlebars');
+const fs = require('fs').promises;
+const path = require('path');
 
 class EmailService {
   constructor() {
-    this.transporter = null;
-    this.isConfigured = false;
-    
-    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-      try {
-        this.transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT || 587,
-          secure: false,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-          }
-        });
-        this.isConfigured = true;
-      } catch (error) {
-        console.warn('Email service not configured:', error.message);
-      }
-    } else {
-      console.log('Email service disabled - SMTP not configured');
+    this.transporter = this.createTransporter();
+    this.templates = new Map();
+    this.loadTemplates();
+  }
+
+  createTransporter() {
+    return nodemailer.createTransporter({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: process.env.SMTP_PORT || 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100
+    });
+  }
+
+  async loadTemplates() {
+    try {
+      const templatesDir = path.join(__dirname, '../templates/email');
+      
+      // Order confirmation template
+      this.templates.set('order-confirmation', {
+        subject: 'Order Confirmation - {{orderNumber}}',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #232f3e;">Order Confirmed!</h1>
+            <p>Hi {{customerName}},</p>
+            <p>Thank you for your order. Your order <strong>{{orderNumber}}</strong> has been confirmed.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; margin: 20px 0;">
+              <h3>Order Details:</h3>
+              {{#each items}}
+              <div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+                <strong>{{name}}</strong><br>
+                Quantity: {{quantity}} × ₹{{price}} = ₹{{total}}
+              </div>
+              {{/each}}
+              
+              <div style="margin-top: 15px; font-size: 18px;">
+                <strong>Total: ₹{{orderTotal}}</strong>
+              </div>
+            </div>
+            
+            <p>Estimated delivery: {{deliveryDate}}</p>
+            <p>Track your order: <a href="{{trackingUrl}}">{{orderNumber}}</a></p>
+          </div>
+        `
+      });
+
+      // Welcome email template
+      this.templates.set('welcome', {
+        subject: 'Welcome to Amazon-Style Store!',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #232f3e;">Welcome {{customerName}}!</h1>
+            <p>Thank you for joining our store. Start shopping now and enjoy:</p>
+            <ul>
+              <li>Free shipping on orders over ₹499</li>
+              <li>Easy returns within 30 days</li>
+              <li>24/7 customer support</li>
+            </ul>
+            <a href="{{shopUrl}}" style="background: #ff9f00; color: black; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
+              Start Shopping
+            </a>
+          </div>
+        `
+      });
+
+      console.log('✅ Email templates loaded');
+    } catch (error) {
+      console.error('❌ Failed to load email templates:', error);
     }
   }
 
-  async sendEmail({ to, subject, html, text }) {
-    if (!this.isConfigured) {
-      console.log(`📧 Email would be sent to ${to}: ${subject}`);
-      return { messageId: 'dev-' + Date.now() };
-    }
-    
+  async sendEmail(to, templateName, data, options = {}) {
     try {
-      const result = await this.transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to,
-        subject,
-        html,
-        text
-      });
-
-      try {
-        await KafkaManager.publishNotificationEvent('EMAIL_SENT', {
-          to,
-          subject,
-          messageId: result.messageId
-        });
-      } catch (kafkaError) {
-        console.warn('Kafka notification failed:', kafkaError.message);
+      const template = this.templates.get(templateName);
+      if (!template) {
+        throw new Error(`Template ${templateName} not found`);
       }
 
+      const subjectTemplate = handlebars.compile(template.subject);
+      const htmlTemplate = handlebars.compile(template.html);
+
+      const mailOptions = {
+        from: process.env.FROM_EMAIL || 'noreply@ecommerce.com',
+        to,
+        subject: subjectTemplate(data),
+        html: htmlTemplate(data),
+        ...options
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ Email sent to ${to}: ${result.messageId}`);
       return result;
     } catch (error) {
-      console.error('Email sending failed:', error);
+      console.error(`❌ Email failed to ${to}:`, error);
       throw error;
     }
   }
 
-  async sendWelcomeEmail(user) {
-    const html = `
-      <h2>Welcome to Our Store!</h2>
-      <p>Hi ${user.firstName},</p>
-      <p>Thank you for joining us. We're excited to have you as part of our community!</p>
-      <p>Start shopping now and discover amazing products.</p>
-    `;
-
-    return this.sendEmail({
-      to: user.email,
-      subject: 'Welcome to Our Store!',
-      html
+  async sendOrderConfirmation(orderData) {
+    const { customerEmail, customerName, orderNumber, items, total, deliveryDate } = orderData;
+    
+    return await this.sendEmail(customerEmail, 'order-confirmation', {
+      customerName,
+      orderNumber,
+      items: items.map(item => ({
+        ...item,
+        total: (item.price * item.quantity).toFixed(2)
+      })),
+      orderTotal: total.toFixed(2),
+      deliveryDate: new Date(deliveryDate).toLocaleDateString(),
+      trackingUrl: `${process.env.FRONTEND_URL}/orders/${orderNumber}`
     });
   }
 
-  async sendOrderConfirmation(order, user) {
-    const html = `
-      <h2>Order Confirmation</h2>
-      <p>Hi ${user.firstName},</p>
-      <p>Thank you for your order!</p>
-      <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-      <p><strong>Total:</strong> $${order.pricing.total}</p>
-      <h3>Items:</h3>
-      <ul>
-        ${order.items.map(item => `<li>${item.product.name} - Qty: ${item.quantity} - $${item.price}</li>`).join('')}
-      </ul>
-    `;
-
-    return this.sendEmail({
-      to: user.email,
-      subject: `Order Confirmation - ${order.orderNumber}`,
-      html
+  async sendWelcomeEmail(userData) {
+    const { email, name } = userData;
+    
+    return await this.sendEmail(email, 'welcome', {
+      customerName: name,
+      shopUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
     });
   }
 
-  async sendShippingNotification(order, user) {
-    const html = `
-      <h2>Your Order Has Shipped!</h2>
-      <p>Hi ${user.firstName},</p>
-      <p>Great news! Your order has been shipped.</p>
-      <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-      <p><strong>Tracking Number:</strong> ${order.tracking.trackingNumber}</p>
-      <p><strong>Carrier:</strong> ${order.tracking.carrier}</p>
-    `;
-
-    return this.sendEmail({
-      to: user.email,
-      subject: `Your Order ${order.orderNumber} Has Shipped`,
-      html
-    });
-  }
-
-  async sendPasswordResetEmail(user, resetToken) {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    const html = `
-      <h2>Password Reset Request</h2>
-      <p>Hi ${user.firstName},</p>
-      <p>You requested a password reset. Click the link below to reset your password:</p>
-      <p><a href="${resetUrl}">Reset Password</a></p>
-      <p>This link will expire in 1 hour.</p>
-      <p>If you didn't request this, please ignore this email.</p>
-    `;
-
-    return this.sendEmail({
-      to: user.email,
-      subject: 'Password Reset Request',
-      html
-    });
+  async verifyConnection() {
+    try {
+      await this.transporter.verify();
+      console.log('✅ Email service connected');
+      return true;
+    } catch (error) {
+      console.error('❌ Email service connection failed:', error);
+      return false;
+    }
   }
 }
 

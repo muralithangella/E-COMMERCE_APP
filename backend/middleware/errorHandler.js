@@ -1,90 +1,160 @@
 const winston = require('winston');
-const path = require('path');
 
-// Custom format for structured logging
-const customFormat = winston.format.combine(
-  winston.format.timestamp(),
-  winston.format.errors({ stack: true }),
-  winston.format.json(),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
-    return JSON.stringify({
-      timestamp,
-      level,
-      message,
-      service: process.env.SERVICE_NAME || 'ecommerce-api',
-      environment: process.env.NODE_ENV,
-      ...meta
-    });
-  })
-);
-
+// Configure Winston logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: customFormat,
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'ecommerce-api' },
   transports: [
-    new winston.transports.File({ 
-      filename: path.join('logs', 'error.log'), 
-      level: 'error',
-      maxsize: 10485760, // 10MB
-      maxFiles: 10
-    }),
-    new winston.transports.File({ 
-      filename: path.join('logs', 'combined.log'),
-      maxsize: 10485760, // 10MB
-      maxFiles: 10
-    }),
-    new winston.transports.File({
-      filename: path.join('logs', 'security.log'),
-      level: 'warn',
-      maxsize: 10485760, // 10MB
-      maxFiles: 5
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
     })
   ]
 });
 
-const errorHandler = (err, req, res, next) => {
-  logger.error({
+class AppError extends Error {
+  constructor(message, statusCode, code = null) {
+    super(message);
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+    this.code = code;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400, 'CAST_ERROR');
+};
+
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `Duplicate field value: ${value}. Please use another value!`;
+  return new AppError(message, 400, 'DUPLICATE_FIELD');
+};
+
+const handleValidationErrorDB = (err) => {
+  const errors = Object.values(err.errors).map(el => el.message);
+  const message = `Invalid input data. ${errors.join('. ')}`;
+  return new AppError(message, 400, 'VALIDATION_ERROR');
+};
+
+const handleJWTError = () =>
+  new AppError('Invalid token. Please log in again!', 401, 'INVALID_TOKEN');
+
+const handleJWTExpiredError = () =>
+  new AppError('Your token has expired! Please log in again.', 401, 'EXPIRED_TOKEN');
+
+const sendErrorDev = (err, res) => {
+  logger.error('Development Error:', {
+    error: err,
+    stack: err.stack,
+    timestamp: new Date().toISOString()
+  });
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    error: err,
     message: err.message,
     stack: err.stack,
-    url: req.url,
-    method: req.method,
-    ip: req.ip,
-    userAgent: req.get('User-Agent')
+    code: err.code
+  });
+};
+
+const sendErrorProd = (err, res) => {
+  // Log error for monitoring
+  logger.error('Production Error:', {
+    message: err.message,
+    statusCode: err.statusCode,
+    code: err.code,
+    stack: err.stack,
+    timestamp: new Date().toISOString()
   });
 
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      message: 'Validation Error',
-      errors: Object.values(err.errors).map(e => e.message)
+  // Operational, trusted error: send message to client
+  if (err.isOperational) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      code: err.code
+    });
+  } else {
+    // Programming or other unknown error: don't leak error details
+    res.status(500).json({
+      status: 'error',
+      message: 'Something went wrong!',
+      code: 'INTERNAL_ERROR'
     });
   }
+};
 
-  if (err.name === 'CastError') {
-    return res.status(400).json({ message: 'Invalid ID format' });
+const globalErrorHandler = (err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  if (process.env.NODE_ENV === 'development') {
+    sendErrorDev(err, res);
+  } else {
+    let error = { ...err };
+    error.message = err.message;
+
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, res);
   }
+};
 
-  if (err.code === 11000) {
-    return res.status(400).json({ message: 'Duplicate field value' });
-  }
-
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({ message: 'Invalid token' });
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({ message: 'Token expired' });
-  }
-
-  res.status(err.statusCode || 500).json({
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
+const catchAsync = (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
 };
 
 const notFound = (req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  res.status(404);
-  next(error);
+  const err = new AppError(`Can't find ${req.originalUrl} on this server!`, 404, 'NOT_FOUND');
+  next(err);
 };
 
-module.exports = { errorHandler, notFound };
+// Request logging middleware
+const requestLogger = (req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info('Request completed', {
+      method: req.method,
+      url: req.originalUrl,
+      statusCode: res.statusCode,
+      duration: `${duration}ms`,
+      userAgent: req.get('User-Agent'),
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
+  });
+  
+  next();
+};
+
+module.exports = {
+  AppError,
+  globalErrorHandler,
+  catchAsync,
+  notFound,
+  requestLogger,
+  logger
+};

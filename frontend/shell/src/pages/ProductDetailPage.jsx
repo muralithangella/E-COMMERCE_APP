@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 import { addToCart } from '../store/slices/cartSlice';
 import { useGetProductsQuery } from '../store/api/apiSlice';
 
@@ -14,7 +15,7 @@ const ProductDetailPage = () => {
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart(product));
-      alert(`${product.name} added to cart!`);
+      toast.success(`${product.name} added to cart!`);
     }
   };
 

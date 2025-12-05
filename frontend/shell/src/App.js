@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
 import HomePage from './pages/HomePage.jsx'
@@ -10,6 +11,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx'
 import OrderConfirmationPage from './pages/OrderConfirmationPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import './styles/App.css'
+import './styles/global.css'
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <Toaster position="top-right" />
     </div>
     </Router>
   )

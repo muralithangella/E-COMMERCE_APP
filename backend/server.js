@@ -451,7 +451,10 @@ app.get('/api/home-sections', (req, res) => {
 
 // DEALS ROUTES
 app.get('/api/deals', (req, res) => {
-  const deals = products.filter(p => p.discount > 20).slice(0, 6);
+  const deals = products
+    .filter(p => p.discount > 20)
+    .sort((a, b) => b.discount - a.discount)
+    .slice(0, 6);
   res.json({ 
     success: true, 
     data: deals 
@@ -460,7 +463,11 @@ app.get('/api/deals', (req, res) => {
 
 // RECOMMENDATIONS ROUTES
 app.get('/api/recommendations', (req, res) => {
-  const recommendations = products.slice(0, 8);
+  // Get a mix of high-rated and popular products
+  const recommendations = products
+    .filter(p => p.rating >= 4.0 || p.reviews > 1000)
+    .sort((a, b) => (b.rating * b.reviews) - (a.rating * a.reviews))
+    .slice(0, 8);
   res.json({ 
     success: true, 
     data: recommendations 
@@ -617,12 +624,74 @@ app.delete('/api/cart/clear', (req, res) => {
   });
 });
 
+// ORDER ROUTES
+let orders = []; // In-memory storage for demo
+
+app.post('/api/orders', (req, res) => {
+  const orderData = req.body;
+  
+  if (!orderData.items || orderData.items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Order must contain at least one item'
+    });
+  }
+  
+  const order = {
+    ...orderData,
+    id: orderData.id || Date.now().toString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  orders.push(order);
+  
+  console.log('Order created:', order.id);
+  
+  res.json({
+    success: true,
+    data: order,
+    message: 'Order created successfully'
+  });
+});
+
+app.get('/api/orders', (req, res) => {
+  res.json({
+    success: true,
+    data: orders
+  });
+});
+
+app.get('/api/orders/:id', (req, res) => {
+  const order = orders.find(o => o.id === req.params.id);
+  
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      message: 'Order not found'
+    });
+  }
+  
+  res.json({
+    success: true,
+    data: order
+  });
+});
+
 // Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ 
     success: true,
     message: 'E-commerce API is working!',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      products: '/api/products',
+      categories: '/api/categories',
+      cart: '/api/cart',
+      orders: '/api/orders',
+      deals: '/api/deals',
+      recommendations: '/api/recommendations'
+    }
   });
 });
 
