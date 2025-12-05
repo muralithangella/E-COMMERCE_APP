@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { clearCart } from '../store/slices/cartSlice';
 
 const CheckoutPage = () => {
-  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [orderData, setOrderData] = useState({
@@ -34,24 +35,8 @@ const CheckoutPage = () => {
     }
   });
 
-  useEffect(() => {
-    const loadCartItems = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/cart');
-        if (response.ok) {
-          const data = await response.json();
-          setCartItems(data.items || []);
-        } else {
-          setCartItems([]);
-        }
-      } catch (error) {
-        console.error('Error loading cart:', error);
-        setCartItems([]);
-      }
-    };
-
-    loadCartItems();
-  }, []);
+  const { items: cartItems } = useSelector(state => state.cart);
+  const dispatch = useDispatch();
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = subtotal > 35 ? 0 : 9.99;
@@ -129,8 +114,7 @@ const CheckoutPage = () => {
       }
 
       localStorage.setItem('lastOrder', JSON.stringify(order));
-      localStorage.removeItem('cart');
-      localStorage.removeItem('cartItems');
+      dispatch(clearCart());
       
       console.log('🎉 Redirecting to order confirmation...');
       window.location.href = `/order-confirmation?orderId=${order.id}`;

@@ -1,9 +1,10 @@
-# Clean E-Commerce Application
+# Amazon-Style E-Commerce Application
 
-A modern, scalable e-commerce application built with microservices architecture.
+A modern, scalable e-commerce application built with microservices architecture, designed to match Amazon's UI/UX.
 
 ## Features
 
+✅ **Amazon-Style Design** - Matches Amazon.in's layout and styling  
 ✅ **Clean Architecture** - Minimal, maintainable code  
 ✅ **Security** - Helmet, CORS, Rate limiting  
 ✅ **Performance** - Compression, optimized React components  
@@ -17,13 +18,21 @@ A modern, scalable e-commerce application built with microservices architecture.
 npm run install:all
 ```
 
-2. **Start backend**
+2. **Start all services** (recommended)
+```bash
+npm run start:all
+```
+
+Or start services individually:
+
+2a. **Start backend**
 ```bash
 npm start
 ```
 
-3. **Start frontend services** (in separate terminals)
+2b. **Start frontend services** (in separate terminals)
 ```bash
+npm run start:shell
 npm run start:products
 npm run start:cart
 ```
@@ -44,10 +53,30 @@ npm run start:cart
 ├── backend/
 │   └── server.js          # Clean API server
 ├── frontend/
+│   ├── shell/             # Main shell application (Amazon-style)
 │   ├── products-mf/       # Products micro-frontend
-│   └── cart-mf/           # Cart micro-frontend
+│   ├── cart-mf/           # Cart micro-frontend
+│   └── auth-mf/           # Authentication micro-frontend
 └── package.json           # Root dependencies
 ```
+
+## Amazon-Style Features
+
+- **Header**: Amazon-style navigation with search bar, location, account menu
+- **Navigation Bar**: Category navigation similar to Amazon
+- **Hero Banner**: Rotating promotional banners
+- **Product Grid**: Amazon-style product cards with ratings and pricing
+- **Cart**: Amazon-style shopping cart with quantity controls
+- **Footer**: Complete Amazon-style footer with links
+- **Color Scheme**: Matches Amazon's brand colors (#131921, #ff9f00, etc.)
+
+## Access Points
+
+- **Main Application**: http://localhost:3000 (Shell)
+- **Products Service**: http://localhost:3001
+- **Cart Service**: http://localhost:3002
+- **Auth Service**: http://localhost:3003
+- **Backend API**: http://localhost:5000
 
 ## Production Deployment
 

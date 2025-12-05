@@ -1,0 +1,33 @@
+.homepage {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+}
+
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  padding: var(--spacing-xl);
+}
+
+.section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    margin-bottom: var(--spacing-xl);
+  }
+}

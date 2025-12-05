@@ -4,24 +4,37 @@
   "description": "Clean E-commerce Microservices Application",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
+    "start": "node backend/amazon-server.js",
+    "start:basic": "node backend/server.js",
+    "dev": "nodemon backend/amazon-server.js",
+    "start:shell": "cd frontend/shell && npm start",
     "start:products": "cd frontend/products-mf && npm start",
     "start:cart": "cd frontend/cart-mf && npm start",
-    "install:all": "npm install && cd frontend/products-mf && npm install && cd ../cart-mf && npm install",
-    "build": "cd frontend/products-mf && npm run build && cd ../cart-mf && npm run build"
+    "start:auth": "cd frontend/auth-mf && npm start",
+    "install:all": "npm install && cd frontend/shell && npm install && cd ../products-mf && npm install && cd ../cart-mf && npm install && cd ../auth-mf && npm install",
+    "build": "cd frontend/shell && npm run build && cd ../products-mf && npm run build && cd ../cart-mf && npm run build",
+    "start:all": "concurrently \"npm start\" \"npm run start:shell\" \"npm run start:products\" \"npm run start:cart\"",
+    "start:amazon": "node backend/amazon-complete-server.js",
+    "dev:amazon": "nodemon backend/amazon-complete-server.js",
+    "start:all:amazon": "concurrently \"npm run start:amazon\" \"npm run start:shell\" \"npm run start:products\" \"npm run start:cart\""
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "compression": "^1.7.4",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.5",
-    "helmet": "^7.1.0",
+    "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
-    "compression": "^1.7.4"
+    "helmet": "^7.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
-  "keywords": ["ecommerce", "microservices", "react", "node"],
+  "keywords": [
+    "ecommerce",
+    "microservices",
+    "react",
+    "node"
+  ],
   "author": "Your Name",
   "license": "MIT"
 }

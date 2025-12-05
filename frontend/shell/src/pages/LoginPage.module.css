@@ -1,0 +1,213 @@
+.loginPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--color-gray-100) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3xl);
+  max-width: 1000px;
+  width: 100%;
+  align-items: center;
+}
+
+.loginCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-light);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.logo img {
+  height: 40px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.errorContainer {
+  margin: calc(var(--spacing-sm) * -1) 0 0 0;
+}
+
+.submitButton {
+  margin-top: var(--spacing-md);
+}
+
+.forgotPassword {
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.forgotLink {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: var(--transition-fast);
+}
+
+.forgotLink:hover {
+  color: var(--color-accent-dark);
+  text-decoration: underline;
+}
+
+.divider {
+  position: relative;
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--border-medium);
+}
+
+.dividerText {
+  background-color: var(--bg-primary);
+  padding: 0 var(--spacing-md);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.socialLogin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.socialButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.socialIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.footerText {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.registerLink {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-fast);
+}
+
+.registerLink:hover {
+  color: var(--color-accent-dark);
+  text-decoration: underline;
+}
+
+.benefits {
+  padding: var(--spacing-xl);
+}
+
+.benefitsTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xl) 0;
+}
+
+.benefitsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.benefitsList li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  position: relative;
+  padding-left: var(--spacing-xl);
+}
+
+.benefitsList li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+  
+  .benefits {
+    order: -1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .loginPage {
+    padding: var(--spacing-md);
+  }
+  
+  .loginCard {
+    padding: var(--spacing-xl);
+  }
+  
+  .benefits {
+    padding: var(--spacing-lg);
+  }
+  
+  .benefitsTitle {
+    font-size: var(--font-size-xl);
+  }
+}

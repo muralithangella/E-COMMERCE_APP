@@ -45,20 +45,30 @@ const ProductsApp = () => {
           url += `?category=${encodeURIComponent(category)}`;
         }
         
-        console.log('Fetching products from:', url);
+        console.log('🔍 ProductsApp: Fetching products from:', url);
+        console.log('🔍 ProductsApp: Current location:', window.location.href);
         
         const response = await fetch(url);
+        
+        console.log('🔍 ProductsApp: Response status:', response.status);
+        console.log('🔍 ProductsApp: Response ok:', response.ok);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Products data:', data);
+        console.log('🔍 ProductsApp: Raw response data:', data);
+        console.log('🔍 ProductsApp: Products array:', data.products);
+        console.log('🔍 ProductsApp: Data array:', data.data);
         
-        setProducts(data.products || []);
+        const productsArray = data.products || data.data || [];
+        console.log('🔍 ProductsApp: Final products array:', productsArray);
+        console.log('🔍 ProductsApp: Products count:', productsArray.length);
+        
+        setProducts(productsArray);
       } catch (err) {
-        console.error('Fetch error:', err);
+        console.error('🚨 ProductsApp: Fetch error:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -163,6 +173,16 @@ const ProductsApp = () => {
           }}>
             {products.length} results
           </p>
+          <div style={{ 
+            margin: '10px 0',
+            padding: '10px',
+            backgroundColor: '#f0f0f0',
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#333'
+          }}>
+            Debug: Loading={loading.toString()}, Error={error || 'none'}, Products={products.length}
+          </div>
         </div>
 
         <div style={{ 
