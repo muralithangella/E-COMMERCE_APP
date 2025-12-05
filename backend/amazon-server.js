@@ -195,7 +195,8 @@ const users = [
       }
     ],
     orders: [], wishlist: [], prime: true
-  }
+  },
+  { id: '2', name: 'Admin', email: 'admin@example.com', password: 'admin123', phone: '', orders: [], wishlist: [], prime: true }
 ];
 
 // Cart storage
@@ -224,16 +225,14 @@ app.post('/api/auth/login', (req, res) => {
   
   res.json({
     success: true,
-    data: {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        prime: user.prime
-      },
-      token: 'jwt-token-' + Date.now()
-    }
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      prime: user.prime
+    },
+    token: 'jwt-token-' + Date.now()
   });
 });
 
@@ -265,16 +264,14 @@ app.post('/api/auth/register', (req, res) => {
   
   res.json({
     success: true,
-    data: {
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone,
-        prime: newUser.prime
-      },
-      token: 'jwt-token-' + Date.now()
-    }
+    user: {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      prime: newUser.prime
+    },
+    token: 'jwt-token-' + Date.now()
   });
 });
 
@@ -419,6 +416,20 @@ app.get('/api/banners', (req, res) => {
   res.json({
     success: true,
     data: banners.filter(b => b.active)
+  });
+});
+
+// RECOMMENDATIONS ROUTES
+app.get('/api/recommendations', (req, res) => {
+  // Get a mix of high-rated and popular products
+  const recommendations = products
+    .filter(p => p.rating >= 4.0 || p.reviews > 1000)
+    .sort((a, b) => (b.rating * b.reviews) - (a.rating * a.reviews))
+    .slice(0, 8);
+  
+  res.json({
+    success: true,
+    data: recommendations
   });
 });
 

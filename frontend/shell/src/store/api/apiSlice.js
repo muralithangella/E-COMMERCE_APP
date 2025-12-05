@@ -2,11 +2,9 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: 'http://localhost:5000/api',
-  prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth?.token;
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
+  credentials: 'include', // Include cookies in requests
+  prepareHeaders: (headers) => {
+    headers.set('Content-Type', 'application/json');
     return headers;
   },
 });
@@ -24,7 +22,7 @@ export const apiSlice = createApi({
       }),
       transformResponse: (response) => {
         console.log('Products API response:', response);
-        return response?.data || response?.products || [];
+        return response?.data || response?.products || (Array.isArray(response) ? response : []);
       },
       providesTags: ['Product'],
     }),
@@ -39,7 +37,7 @@ export const apiSlice = createApi({
       query: () => '/categories',
       transformResponse: (response) => {
         console.log('Categories API response:', response);
-        return response?.data || response?.categories || [];
+        return response?.data || response?.categories || (Array.isArray(response) ? response : []);
       },
       providesTags: ['Category'],
     }),
@@ -107,12 +105,18 @@ export const apiSlice = createApi({
     // Search and recommendations
     getDeals: builder.query({
       query: () => '/deals',
-      transformResponse: (response) => response?.data || response,
+      transformResponse: (response) => {
+        console.log('Deals API response:', response);
+        return response?.data || (Array.isArray(response) ? response : []);
+      },
       providesTags: ['Product'],
     }),
     getRecommendations: builder.query({
-      query: () => '/recommendations',
-      transformResponse: (response) => response?.data || response,
+      query: () => '/recommendations', 
+      transformResponse: (response) => {
+        console.log('Recommendations API response:', response);
+        return response?.data || (Array.isArray(response) ? response : []);
+      },
       providesTags: ['Product'],
     }),
     searchProducts: builder.query({

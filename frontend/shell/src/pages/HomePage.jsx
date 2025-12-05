@@ -105,9 +105,7 @@ const HomePage = () => {
           products={productsData || []}
           onProductClick={handleProductClick}
         />
-      </section>
-      
-
+      </section>   
     </main>
   );
 };

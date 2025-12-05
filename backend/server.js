@@ -273,7 +273,8 @@ const homeSections = {
 const mockUsers = [
   { id: '1', name: 'John Doe', email: 'john@example.com', password: 'password123' },
   { id: '2', name: 'Jane Smith', email: 'jane@example.com', password: 'password456' },
-  { id: '3', name: 'Test User', email: 'test@example.com', password: 'test123' }
+  { id: '3', name: 'Test User', email: 'test@example.com', password: 'test123' },
+  { id: '4', name: 'Admin', email: 'admin@example.com', password: 'admin123' }
 ];
 
 // In-memory cart storage (reset to empty)
@@ -303,16 +304,13 @@ app.post('/api/auth/login', (req, res) => {
   
   res.json({
     success: true,
-    data: {
-      user: { 
-        id: user.id, 
-        name: user.name, 
-        email: user.email,
-        role: 'user'
-      },
-      accessToken: 'mock-jwt-token-' + Date.now(),
-      refreshToken: 'mock-refresh-token-' + Date.now()
-    }
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email,
+      role: 'user'
+    },
+    token: 'mock-jwt-token-' + Date.now()
   });
 });
 
@@ -346,16 +344,13 @@ app.post('/api/auth/register', (req, res) => {
   
   res.json({
     success: true,
-    data: {
-      user: { 
-        id: newUser.id, 
-        name: newUser.name, 
-        email: newUser.email,
-        role: 'user'
-      },
-      accessToken: 'mock-jwt-token-' + Date.now(),
-      refreshToken: 'mock-refresh-token-' + Date.now()
-    }
+    user: { 
+      id: newUser.id, 
+      name: newUser.name, 
+      email: newUser.email,
+      role: 'user'
+    },
+    token: 'mock-jwt-token-' + Date.now()
   });
 });
 

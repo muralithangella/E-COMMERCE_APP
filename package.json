@@ -2,9 +2,9 @@
   "name": "ecommerce-app",
   "version": "1.0.0",
   "description": "Clean E-commerce Microservices Application",
-  "main": "backend/server.js",
+  "main": "backend/fixed-server.js",
   "scripts": {
-    "start": "node backend/amazon-server.js",
+    "start": "node backend/mongodb-server.js",
     "start:basic": "node backend/server.js",
     "dev": "nodemon backend/amazon-server.js",
     "start:shell": "cd frontend/shell && npm start",

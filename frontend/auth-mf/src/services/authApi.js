@@ -4,11 +4,9 @@ export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://localhost:5000/api/auth',
-    prepareHeaders: (headers, { getState }) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-      }
+    credentials: 'include', // Include cookies in requests
+    prepareHeaders: (headers) => {
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
@@ -33,10 +31,12 @@ export const authApi = createApi({
         url: '/logout',
         method: 'POST',
       }),
-      transformResponse: () => {
-        localStorage.removeItem('token');
-        return { success: true };
-      },
+    }),
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: '/refresh',
+        method: 'POST',
+      }),
     }),
   }),
 });
