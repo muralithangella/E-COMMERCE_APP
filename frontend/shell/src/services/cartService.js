@@ -1,13 +1,15 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export class CartService {
   static async addToCart(productId, quantity = 1) {
     try {
-      const response = await fetch('http://localhost:5000/api/cart/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity })
+      const response = await axios.post(`${API_BASE_URL}/cart/add`, {
+        productId,
+        quantity
       });
-      if (!response.ok) throw new Error('Failed to add to cart');
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('CartService.addToCart error:', error);
       throw error;
@@ -16,9 +18,8 @@ export class CartService {
 
   static async getCart() {
     try {
-      const response = await fetch('http://localhost:5000/api/cart');
-      if (!response.ok) throw new Error('Failed to get cart');
-      return await response.json();
+      const response = await axios.get(`${API_BASE_URL}/cart`);
+      return response.data;
     } catch (error) {
       console.error('CartService.getCart error:', error);
       throw error;
@@ -27,13 +28,10 @@ export class CartService {
 
   static async updateCartItem(itemId, quantity) {
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/items/${itemId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity })
+      const response = await axios.put(`${API_BASE_URL}/cart/items/${itemId}`, {
+        quantity
       });
-      if (!response.ok) throw new Error('Failed to update cart item');
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('CartService.updateCartItem error:', error);
       throw error;
@@ -42,11 +40,8 @@ export class CartService {
 
   static async removeFromCart(itemId) {
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/items/${itemId}`, {
-        method: 'DELETE'
-      });
-      if (!response.ok) throw new Error('Failed to remove from cart');
-      return await response.json();
+      const response = await axios.delete(`${API_BASE_URL}/cart/items/${itemId}`);
+      return response.data;
     } catch (error) {
       console.error('CartService.removeFromCart error:', error);
       throw error;

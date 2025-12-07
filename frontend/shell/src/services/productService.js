@@ -1,11 +1,14 @@
 import { apiSlice } from '../store/api/apiSlice';
 
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export class ProductService {
   static async getProducts(params = {}) {
     try {
-      const response = await fetch(`http://localhost:5000/api/products?${new URLSearchParams(params)}`);
-      if (!response.ok) throw new Error('Failed to fetch products');
-      return await response.json();
+      const response = await axios.get(`${API_BASE_URL}/products`, { params });
+      return response.data;
     } catch (error) {
       console.error('ProductService.getProducts error:', error);
       throw error;
@@ -14,9 +17,8 @@ export class ProductService {
 
   static async getProduct(id) {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch product');
-      return await response.json();
+      const response = await axios.get(`${API_BASE_URL}/products/${id}`);
+      return response.data;
     } catch (error) {
       console.error('ProductService.getProduct error:', error);
       throw error;

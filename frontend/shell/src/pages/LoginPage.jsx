@@ -1,182 +1,121 @@
-import React, { useCallback, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { useLoginMutation } from '../store/api/authApi';
-import { setCredentials } from '../store/slices/authSlice';
-import Input from '../components/Input/Input';
-import Button from '../components/Button/Button';
-import ErrorMessage from '../components/ErrorMessage/ErrorMessage';
-import { VALIDATION_RULES } from '../constants/validation';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 import styles from './LoginPage.module.css';
 
-const loginSchema = yup.object({
-  email: yup
-    .string()
-    .email('Please enter a valid email')
-    .required('Email is required'),
-  password: yup
-    .string()
-    .min(VALIDATION_RULES.PASSWORD.MIN_LENGTH, `Password must be at least ${VALIDATION_RULES.PASSWORD.MIN_LENGTH} characters`)
-    .required('Password is required')
-});
-
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector(state => state.auth);
-  
-  const [login, { isLoading, error }] = useLoginMutation();
-  
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-    setFocus
-  } = useForm({
-    resolver: yupResolver(loginSchema),
-    mode: 'onChange'
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const from = location.state?.from?.pathname || '/';
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, from]);
-
-  useEffect(() => {
-    setFocus('email');
-  }, [setFocus]);
-
-  const onSubmit = useCallback(async (data) => {
     try {
-      const result = await login(data).unwrap();
-      dispatch(setCredentials(result));
-      navigate(from, { replace: true });
-    } catch (err) {
-      console.error('Login failed:', err);
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password
+      }, {
+        withCredentials: true
+      });
+      
+      const data = response.data;
+      
+      if (data) {
+        // Handle different response formats
+        const token = data.token || data.accessToken || 'dummy-token';
+        const userData = data.user || data.data || { name: email.split('@')[0], email: email };
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        window.location.href = '/';
+      } else {
+        setError(data.message || 'Authentication failed');
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || 'Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }, [login, dispatch, navigate, from]);
-
-  const handleGoogleLogin = useCallback(() => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
-  }, []);
-
-  const handleFacebookLogin = useCallback(() => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/facebook`;
-  }, []);
+  };
 
   return (
-    <div className={styles.loginPage}>
-      <div className={styles.container}>
-        <div className={styles.loginCard}>
-          <div className={styles.header}>
-            <Link to="/" className={styles.logo}>
-              <img src="/amazon-logo.png" alt="Amazon" />
-            </Link>
-            <h1 className={styles.title}>Sign In</h1>
+    <div className={styles.container}>
+      <Link to="/" className={styles.logo}>
+        <span className={styles.logoAmazon}>amazon</span>.in
+      </Link>
+      
+      <div className={styles.formContainer}>
+        <h1 className={styles.title}>Sign in</h1>
+        
+        {error && (
+          <div className={styles.errorBox}>
+            <strong>There was a problem</strong><br/>
+            {error}
           </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <Input
-                {...register('email')}
-                type="email"
-                label="Email"
-                placeholder="Enter your email"
-                error={errors.email?.message}
-                autoComplete="email"
-              />
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Email or mobile phone number</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+          <div className={styles.passwordGroup}>
+            <label className={styles.label}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={styles.input}
+            />
+            <div className={styles.passwordHint}>
+              Passwords must be at least 6 characters.
             </div>
-
-            <div className={styles.inputGroup}>
-              <Input
-                {...register('password')}
-                type="password"
-                label="Password"
-                placeholder="Enter your password"
-                error={errors.password?.message}
-                autoComplete="current-password"
-              />
-            </div>
-
-            {error && (
-              <div className={styles.errorContainer}>
-                <ErrorMessage message={error.message || 'Login failed'} />
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              loading={isLoading}
-              disabled={!isValid}
-              className={styles.submitButton}
-            >
-              Sign In
-            </Button>
-
-            <div className={styles.forgotPassword}>
-              <Link to="/forgot-password" className={styles.forgotLink}>
-                Forgot your password?
-              </Link>
-            </div>
-          </form>
-
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>or</span>
           </div>
-
-          <div className={styles.socialLogin}>
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={handleGoogleLogin}
-              className={styles.socialButton}
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.submitButton}
+          >
+            {loading ? 'Signing In...' : 'Sign in'}
+          </button>
+          
+          <div className={styles.forgotPassword}>
+            <a
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={styles.forgotLink}
             >
-              <img src="/google-icon.svg" alt="Google" className={styles.socialIcon} />
-              Continue with Google
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={handleFacebookLogin}
-              className={styles.socialButton}
-            >
-              <img src="/facebook-icon.svg" alt="Facebook" className={styles.socialIcon} />
-              Continue with Facebook
-            </Button>
+              Forgot your password?
+            </a>
           </div>
-
-          <div className={styles.footer}>
-            <p className={styles.footerText}>
-              New to Amazon?{' '}
-              <Link to="/register" className={styles.registerLink}>
-                Create your Amazon account
-              </Link>
-            </p>
-          </div>
+        </form>
+        
+        <div className={styles.divider}>
+          <div className={styles.dividerLine}></div>
+          <span className={styles.dividerText}>New to Amazon?</span>
         </div>
-
-        <div className={styles.benefits}>
-          <h2 className={styles.benefitsTitle}>Sign in for the best experience</h2>
-          <ul className={styles.benefitsList}>
-            <li>Fast, free delivery with Prime</li>
-            <li>Exclusive deals and early access</li>
-            <li>Personalized recommendations</li>
-            <li>Easy returns and exchanges</li>
-            <li>Secure payment and checkout</li>
-          </ul>
+        
+        <Link to="/register" className={styles.createAccountLink}>
+          Create your Amazon account
+        </Link>
+        
+        <div className={styles.demoCredentials}>
+          <p className={styles.demoTitle}>Demo Credentials:</p>
+          <p className={styles.demoText}>Email: admin@example.com</p>
+          <p className={styles.demoText}>Password: admin123</p>
         </div>
       </div>
     </div>

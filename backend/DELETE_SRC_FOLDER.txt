@@ -1,0 +1,19 @@
+⚠️ IMPORTANT: DELETE THE OLD src/ FOLDER
+
+The backend/src/ folder is NO LONGER NEEDED.
+
+All code has been moved to microservices:
+  backend/src/modules/product/  →  backend/product-service/
+  backend/src/modules/cart/     →  backend/cart-service/
+  backend/src/modules/order/    →  backend/order-service/
+  backend/src/modules/auth/     →  backend/auth-service/
+
+TO DELETE:
+1. Close all terminals/editors accessing backend/src/
+2. Navigate to: c:\ecommerce-app\backend\
+3. Right-click "src" folder → Delete
+4. Or run as Administrator: rmdir /s /q src
+
+The src/ folder is completely redundant and should be removed.
+
+See CLEANUP_INSTRUCTIONS.md for details.

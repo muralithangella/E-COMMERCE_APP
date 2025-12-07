@@ -8,68 +8,39 @@ export const productsApi = createApi({
   tagTypes: ['Product'],
   endpoints: (builder) => ({
     getProducts: builder.query({
-      queryFn: async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const mockProducts = [
-          {
-            id: 1,
-            name: 'MacBook Pro 16-inch',
-            price: 2399.99,
-            originalPrice: 2599.99,
-            category: 'Electronics',
-            brand: 'Apple',
-            rating: 4.8,
-            reviewCount: 1247,
-            image: 'https://picsum.photos/400/300?random=1',
-            description: 'Apple MacBook Pro with M2 Pro chip, 16GB RAM, 512GB SSD',
-            inStock: true,
-            stockCount: 15,
-            discount: 8,
-            freeShipping: true,
-            prime: true
-          },
-          {
-            id: 2,
-            name: 'Sony WH-1000XM5 Wireless Headphones',
-            price: 349.99,
-            originalPrice: 399.99,
-            category: 'Electronics',
-            brand: 'Sony',
-            rating: 4.6,
-            reviewCount: 892,
-            image: 'https://picsum.photos/400/300?random=2',
-            description: 'Industry-leading noise canceling headphones',
-            inStock: true,
-            stockCount: 8,
-            discount: 12,
-            freeShipping: true,
-            prime: true
-          },
-          {
-            id: 3,
-            name: 'Apple Watch Series 9',
-            price: 429.99,
-            originalPrice: 449.99,
-            category: 'Electronics',
-            brand: 'Apple',
-            rating: 4.7,
-            reviewCount: 2156,
-            image: 'https://picsum.photos/400/300?random=3',
-            description: 'Advanced health monitoring and fitness tracking',
-            inStock: true,
-            stockCount: 23,
-            discount: 4,
-            freeShipping: true,
-            prime: true
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            queryParams.append(key, value);
           }
-        ];
-        
-        return { data: mockProducts };
+        });
+        return `?${queryParams.toString()}`;
+      },
+      transformResponse: (response) => {
+        return response.success ? response.data : [];
+      },
+      providesTags: ['Product'],
+    }),
+    getProduct: builder.query({
+      query: (id) => `/${id}`,
+      transformResponse: (response) => {
+        return response.success ? response.data : null;
+      },
+      providesTags: (result, error, id) => [{ type: 'Product', id }],
+    }),
+    getCategories: builder.query({
+      query: () => '/categories',
+      transformResponse: (response) => {
+        return response.success ? response.data : [];
       },
       providesTags: ['Product'],
     }),
   }),
 });
 
-export const { useGetProductsQuery } = productsApi;
+export const { 
+  useGetProductsQuery, 
+  useGetProductQuery, 
+  useGetCategoriesQuery 
+} = productsApi;

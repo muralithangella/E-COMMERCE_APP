@@ -7,8 +7,6 @@ const SimpleLoginForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
-  const [name, setName] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,31 +14,21 @@ const SimpleLoginForm = () => {
     setError('');
 
     try {
-      const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-      const body = isRegister 
-        ? { name, email, password }
-        : { email, password };
-
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`http://localhost:5000/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies
-        body: JSON.stringify(body)
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
       });
 
       const data = await response.json();
-      console.log('Login response:', { status: response.status, data });
       
       if (response.ok && data.success) {
-        // Tokens are now stored in HTTP-only cookies automatically
-        console.log('Login successful, redirecting...');
         window.location.href = '/';
       } else {
-        console.log('Login failed:', data);
         setError(data.message || 'Authentication failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -48,138 +36,186 @@ const SimpleLoginForm = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '2rem auto', padding: '2rem', border: '1px solid #ddd', borderRadius: '8px' }}>
-      <h2>{isRegister ? 'Register' : 'Login'}</h2>
+    <div style={{ 
+      maxWidth: '350px', 
+      margin: '2rem auto', 
+      padding: '20px', 
+      border: '1px solid #ddd', 
+      borderRadius: '4px',
+      backgroundColor: 'white',
+      fontFamily: 'Amazon Ember, Arial, sans-serif'
+    }}>
+      <h1 style={{ 
+        fontSize: '28px', 
+        fontWeight: '400', 
+        lineHeight: '1.2', 
+        marginBottom: '18px',
+        color: '#0F1111'
+      }}>
+        Sign in
+      </h1>
       
       {error && (
         <div style={{ 
-          padding: '0.75rem', 
-          marginBottom: '1rem', 
-          backgroundColor: '#fee', 
-          color: '#c33', 
-          border: '1px solid #fcc', 
+          padding: '14px 18px', 
+          marginBottom: '14px', 
+          backgroundColor: '#fdf2f2', 
+          border: '1px solid #d70000', 
           borderRadius: '4px',
-          fontSize: '14px'
+          fontSize: '13px',
+          color: '#d70000'
         }}>
+          <strong>There was a problem</strong><br/>
           {error}
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
-        {isRegister && (
-          <div style={{ marginBottom: '1rem' }}>
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
-            />
-          </div>
-        )}
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ 
+            display: 'block', 
+            fontSize: '13px', 
+            fontWeight: '700', 
+            color: '#111', 
+            marginBottom: '2px' 
+          }}>Email or mobile phone number</label>
           <input
             type="email"
-            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+            style={{ 
+              width: '100%', 
+              padding: '3px 7px', 
+              border: '1px solid #a6a6a6', 
+              borderRadius: '3px',
+              fontSize: '13px',
+              lineHeight: '19px',
+              boxSizing: 'border-box'
+            }}
           />
         </div>
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{ marginBottom: '22px' }}>
+          <label style={{ 
+            display: 'block', 
+            fontSize: '13px', 
+            fontWeight: '700', 
+            color: '#111', 
+            marginBottom: '2px' 
+          }}>Password</label>
           <input
             type="password"
-            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+            style={{ 
+              width: '100%', 
+              padding: '3px 7px', 
+              border: '1px solid #a6a6a6', 
+              borderRadius: '3px',
+              fontSize: '13px',
+              lineHeight: '19px',
+              boxSizing: 'border-box'
+            }}
           />
+          <div style={{ fontSize: '11px', color: '#767676', marginTop: '2px' }}>
+            Passwords must be at least 6 characters.
+          </div>
         </div>
+        
         <button
           type="submit"
           disabled={loading}
           style={{
             width: '100%',
-            padding: '0.75rem',
-            backgroundColor: '#ff9f00',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
+            padding: '8px',
+            backgroundColor: '#ffd814',
+            border: '1px solid #fcd200',
+            borderRadius: '8px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold'
+            fontSize: '13px',
+            lineHeight: '29px',
+            textAlign: 'center',
+            color: '#0f1111',
+            marginBottom: '14px'
           }}
         >
-          {loading ? (isRegister ? 'Creating Account...' : 'Signing In...') : (isRegister ? 'Create Account' : 'Sign In')}
+          {loading ? 'Signing In...' : 'Sign in'}
         </button>
+        
+        <div style={{ textAlign: 'left', marginBottom: '14px' }}>
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            style={{
+              color: '#0066c0',
+              fontSize: '13px',
+              textDecoration: 'none'
+            }}
+          >
+            Forgot your password?
+          </a>
+        </div>
       </form>
       
-      <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-        <button
-          type="button"
-          onClick={() => {
-            setIsRegister(!isRegister);
-            setError('');
-            setName('');
-            setEmail('');
-            setPassword('');
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#007bff',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            fontSize: '14px'
-          }}
-        >
-          {isRegister ? 'Already have an account? Sign In' : 'Need an account? Create one'}
-        </button>
+      <div style={{ 
+        textAlign: 'center', 
+        fontSize: '12px', 
+        color: '#767676', 
+        margin: '22px 0 14px 0',
+        position: 'relative'
+      }}>
+        <div style={{
+          borderTop: '1px solid #e7e7e7',
+          position: 'absolute',
+          top: '50%',
+          left: '0',
+          right: '0'
+        }}></div>
+        <span style={{
+          backgroundColor: 'white',
+          padding: '0 8px',
+          position: 'relative'
+        }}>New to Amazon?</span>
       </div>
       
-      <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-        <p style={{ margin: '0 0 0.5rem 0', fontSize: '14px', fontWeight: 'bold' }}>Test Credentials:</p>
-        <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>Email: admin@example.com</p>
-        <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>Password: admin123</p>
+      <a
+        href="/register"
+        style={{
+          display: 'block',
+          width: '100%',
+          padding: '8px',
+          backgroundColor: '#f7f8fa',
+          border: '1px solid #adb1b8',
+          borderRadius: '8px',
+          fontSize: '13px',
+          lineHeight: '29px',
+          textAlign: 'center',
+          color: '#0f1111',
+          textDecoration: 'none',
+          marginBottom: '14px',
+          boxSizing: 'border-box'
+        }}
+      >
+        Create your Amazon account
+      </a>
+      
+      <div style={{ marginTop: '16px', padding: '14px', backgroundColor: '#f7f8fa', borderRadius: '4px', border: '1px solid #ddd' }}>
+        <p style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f1111' }}>Demo Credentials:</p>
+        <p style={{ margin: '0', fontSize: '12px', color: '#565959' }}>Email: admin@example.com</p>
+        <p style={{ margin: '0', fontSize: '12px', color: '#565959' }}>Password: admin123</p>
       </div>
     </div>
   );
 };
 
 const AuthPage = () => {
-  const [shouldRedirect, setShouldRedirect] = React.useState(false);
-
-  // Check if already logged in by testing an authenticated endpoint
+  // Redirect to login page instead of showing modal
   React.useEffect(() => {
-    fetch('http://localhost:5000/api/test', {
-      credentials: 'include'
-    })
-    .then(response => {
-      if (response.ok) {
-        // User is likely authenticated, but we'll let the app handle this
-        // setShouldRedirect(true);
-        // window.location.href = '/';
-      }
-    })
-    .catch(() => {
-      // Not authenticated, stay on auth page
-    });
+    window.location.href = '/login';
   }, []);
 
-  if (shouldRedirect) {
-    return <div>Redirecting...</div>;
-  }
-
-  return (
-    <div>
-      <Suspense fallback={<div>Loading authentication...</div>}>
-        <AuthApp />
-      </Suspense>
-    </div>
-  );
+  return <div>Redirecting to login...</div>;
 };
 
 export default AuthPage;

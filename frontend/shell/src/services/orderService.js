@@ -1,13 +1,12 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export class OrderService {
   static async createOrder(orderData) {
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
-      if (!response.ok) throw new Error('Failed to create order');
-      return await response.json();
+      const response = await axios.post(`${API_BASE_URL}/orders`, orderData);
+      return response.data;
     } catch (error) {
       console.error('OrderService.createOrder error:', error);
       throw error;
@@ -16,9 +15,8 @@ export class OrderService {
 
   static async getOrders() {
     try {
-      const response = await fetch('http://localhost:5000/api/orders');
-      if (!response.ok) throw new Error('Failed to get orders');
-      return await response.json();
+      const response = await axios.get(`${API_BASE_URL}/orders`);
+      return response.data;
     } catch (error) {
       console.error('OrderService.getOrders error:', error);
       throw error;
@@ -27,9 +25,8 @@ export class OrderService {
 
   static async getOrder(orderId) {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`);
-      if (!response.ok) throw new Error('Failed to get order');
-      return await response.json();
+      const response = await axios.get(`${API_BASE_URL}/orders/${orderId}`);
+      return response.data;
     } catch (error) {
       console.error('OrderService.getOrder error:', error);
       throw error;

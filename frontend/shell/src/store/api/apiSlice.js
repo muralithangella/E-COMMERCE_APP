@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api',
-  credentials: 'include', // Include cookies in requests
+  baseUrl: '/api',
+  credentials: 'include',
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
     return headers;
@@ -102,6 +102,30 @@ export const apiSlice = createApi({
       providesTags: (result, error, id) => [{ type: 'Order', id }],
     }),
     
+    // Auth endpoints
+    login: builder.mutation({
+      query: (credentials) => ({
+        url: '/auth/login',
+        method: 'POST',
+        body: credentials,
+      }),
+      transformResponse: (response) => response,
+    }),
+    register: builder.mutation({
+      query: (userData) => ({
+        url: '/auth/register',
+        method: 'POST',
+        body: userData,
+      }),
+      transformResponse: (response) => response,
+    }),
+    logout: builder.mutation({
+      query: () => ({
+        url: '/auth/logout',
+        method: 'POST',
+      }),
+    }),
+    
     // Search and recommendations
     getDeals: builder.query({
       query: () => '/deals',
@@ -144,4 +168,7 @@ export const {
   useGetDealsQuery,
   useGetRecommendationsQuery,
   useSearchProductsQuery,
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
 } = apiSlice;

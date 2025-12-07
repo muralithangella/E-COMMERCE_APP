@@ -57,19 +57,19 @@ const AmazonProductList = ({ category = 'all', searchQuery = '' }) => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({
-        category: category !== 'all' ? category : '',
-        search: searchQuery,
-        brand: filters.brand,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        rating: filters.rating,
-        sort: filters.sort,
-        page: pagination.page,
-        limit: pagination.limit
-      });
+      const queryParams = new URLSearchParams();
+      
+      if (category !== 'all') queryParams.append('category', category);
+      if (searchQuery) queryParams.append('search', searchQuery);
+      if (filters.brand) queryParams.append('brand', filters.brand);
+      if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
+      if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
+      if (filters.rating) queryParams.append('rating', filters.rating);
+      if (filters.sort) queryParams.append('sort', filters.sort);
+      queryParams.append('page', pagination.page);
+      queryParams.append('limit', pagination.limit);
 
-      const response = await fetch(`/api/products?${queryParams}`);
+      const response = await fetch(`http://localhost:5000/api/products?${queryParams}`);
       const data = await response.json();
       
       if (data.success) {
@@ -146,16 +146,17 @@ const AmazonProductList = ({ category = 'all', searchQuery = '' }) => {
 
   const addToCart = async (productId) => {
     try {
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'user-id': 'guest'
         },
         body: JSON.stringify({ productId, quantity: 1 })
       });
       
-      if (response.ok) {
-        // Show success message or update cart count
+      const data = await response.json();
+      if (data.success) {
         console.log('Added to cart successfully');
       }
     } catch (error) {
@@ -165,15 +166,17 @@ const AmazonProductList = ({ category = 'all', searchQuery = '' }) => {
 
   const addToWishlist = async (productId) => {
     try {
-      const response = await fetch('/api/wishlist/add', {
+      const response = await fetch('http://localhost:5000/api/wishlist/add', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'user-id': 'guest'
         },
         body: JSON.stringify({ productId })
       });
       
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         console.log('Added to wishlist successfully');
       }
     } catch (error) {

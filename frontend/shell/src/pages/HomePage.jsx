@@ -39,6 +39,9 @@ const HomePage = () => {
     isLoading: dealsLoading
   } = useGetDealsQuery();
   
+  console.log('HomePage - Deals Data:', dealsData);
+  console.log('HomePage - Deals Loading:', dealsLoading);
+  
   const {
     data: recommendationsData,
     isLoading: recommendationsLoading

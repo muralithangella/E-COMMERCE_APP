@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+import axios from 'axios';
+import styles from './Header.module.css';
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -52,6 +53,7 @@ const Header = () => {
   };
 
   return (
+
     <>
       {/* Main Header */}
       <header style={{
@@ -154,16 +156,18 @@ const Header = () => {
             padding: '8px',
             cursor: 'pointer'
           }}>
-            {isAuthenticated ? (
-              <div onClick={handleLogout}>
-                <div style={{ fontSize: '12px', color: '#ccc' }}>Hello, {user?.name}</div>
-                <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Account & Lists</div>
+
+           
+            {isAuthenticated && user ? (
+              <div onClick={handleLogout} style={{ cursor: 'pointer' }}>
+                <div style={{ fontSize: '12px', color: '#ccc' }}>Hello, {user.name}</div>
+                <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Sign Out</div>
               </div>
             ) : (
-              <div onClick={() => setShowLoginForm(true)}>
+              <a href="/login" style={{ color: 'white', textDecoration: 'none' }}>
                 <div style={{ fontSize: '12px', color: '#ccc' }}>Hello, sign in</div>
                 <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Account & Lists</div>
-              </div>
+              </a>
             )}
           </div>
 
@@ -231,139 +235,7 @@ const Header = () => {
         </div>
       </header>
       
-      {/* Login Form Modal */}
-      {showLoginForm && !isAuthenticated && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '8px',
-            width: '350px',
-            maxWidth: '90vw',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-            border: '1px solid #ddd'
-          }}>
-            <h2 style={{ margin: '0 0 1rem 0', fontSize: '28px', fontWeight: '400' }}>Sign in</h2>
-            
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const email = formData.get('email');
-              const password = formData.get('password');
-              
-              try {
-                const response = await fetch('http://localhost:5000/api/auth/login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email, password })
-                });
-                
-                if (response.ok) {
-                  const data = await response.json();
-                  localStorage.setItem('token', data.token);
-                  localStorage.setItem('user', JSON.stringify(data.user));
-                  setShowLoginForm(false);
-                  window.location.reload();
-                } else {
-                  toast.error('Login failed');
-                }
-              } catch (error) {
-                toast.error('Login error');
-              }
-            }}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '13px', fontWeight: 'bold' }}>Email or mobile phone number</label>
-                <input
-                  name="email"
-                  type="email"
-                  defaultValue="admin@example.com"
-                  required
-                  style={{ 
-                    width: '100%', 
-                    padding: '8px', 
-                    border: '1px solid #a6a6a6', 
-                    borderRadius: '3px',
-                    fontSize: '13px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '13px', fontWeight: 'bold' }}>Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  defaultValue="admin123"
-                  required
-                  style={{ 
-                    width: '100%', 
-                    padding: '8px', 
-                    border: '1px solid #a6a6a6', 
-                    borderRadius: '3px',
-                    fontSize: '13px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-              
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  backgroundColor: '#f0c14b',
-                  border: '1px solid #a88734',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  marginBottom: '1rem'
-                }}
-              >
-                Sign in
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setShowLoginForm(false)}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  backgroundColor: '#fff',
-                  border: '1px solid #d5d9d9',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontSize: '13px'
-                }}
-              >
-                Cancel
-              </button>
-            </form>
-            
-            <div style={{
-              marginTop: '1rem',
-              padding: '1rem',
-              backgroundColor: '#f3f3f3',
-              borderRadius: '4px',
-              fontSize: '11px'
-            }}>
-              <strong>Demo Credentials:</strong><br/>
-              Email: admin@example.com<br/>
-              Password: admin123
-            </div>
-          </div>
-        </div>
-      )}
+
     </>
   );
 };

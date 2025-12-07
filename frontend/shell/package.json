@@ -6,10 +6,13 @@
     "build": "webpack --mode production"
   },
   "dependencies": {
+    "axios": "^1.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.6.0",
-    "react-router-dom": "^6.15.0"
+    "react-router-dom": "^6.15.0",
+    "react-redux": "^8.1.0",
+    "@reduxjs/toolkit": "^1.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",

@@ -1,0 +1,196 @@
+.header {
+  background-color: #131921;
+  color: white;
+  padding: 0;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  margin-right: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px;
+}
+
+.logoAmazon {
+  color: #ff9f00;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.locationIcon {
+  margin-right: 8px;
+}
+
+.locationText {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.locationArea {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.searchForm {
+  flex: 1;
+  display: flex;
+  max-width: 600px;
+  margin-right: 20px;
+}
+
+.searchSelect {
+  background-color: #f3f3f3;
+  border: none;
+  padding: 10px;
+  border-radius: 4px 0 0 4px;
+  font-size: 12px;
+  color: #333;
+  min-width: 50px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
+
+.searchButton {
+  background-color: #febd69;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+.language {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.languageFlag {
+  margin-right: 4px;
+}
+
+.languageText {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.account {
+  margin-right: 20px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.accountLink {
+  color: white;
+  text-decoration: none;
+}
+
+.accountText {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.accountLabel {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.returns {
+  margin-right: 20px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.returnsText {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.returnsLabel {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.cart {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  position: relative;
+}
+
+.cartIcon {
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+.cartText {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.cartCount {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.navBar {
+  background-color: #232f3e;
+  padding: 8px 16px;
+}
+
+.navContainer {
+  display: flex;
+  align-items: center;
+  max-width: 1500px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.navMenu {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.navMenuIcon {
+  margin-right: 4px;
+}
+
+.navMenuText {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.navLink {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 4px 8px;
+}

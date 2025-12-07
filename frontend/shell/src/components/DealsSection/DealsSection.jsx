@@ -23,7 +23,7 @@ const DealsSection = ({ deals = [], loading = false, onProductClick }) => {
     <div style={{ padding: '20px', backgroundColor: 'white' }}>
       <h2 style={{ marginBottom: '20px', fontSize: '21px', fontWeight: '700', color: '#0F1111' }}>Today's Deals</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-        {deals.slice(0, 6).map((product) => (
+        {deals.map((product) => (
           <ProductCard
             key={product.id || product._id}
             product={product}

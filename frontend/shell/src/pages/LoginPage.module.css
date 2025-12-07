@@ -1,213 +1,173 @@
-.loginPage {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--color-gray-100) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-lg);
-}
-
 .container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-3xl);
-  max-width: 1000px;
-  width: 100%;
+  min-height: calc(100vh - 200px);
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
 }
 
-.loginCard {
-  background-color: var(--bg-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-2xl);
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-light);
+.logo {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #131921;
+  text-decoration: none;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
+.logoAmazon {
+  color: #ff9f00;
 }
 
-.logo img {
-  height: 40px;
-  margin-bottom: var(--spacing-lg);
+.formContainer {
+  max-width: 350px;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-family: 'Amazon Ember', Arial, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin: 20px;
 }
 
 .title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 18px;
+  color: #0F1111;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+.errorBox {
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  background-color: #fdf2f2;
+  border: 1px solid #d70000;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #d70000;
 }
 
 .inputGroup {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 14px;
 }
 
-.errorContainer {
-  margin: calc(var(--spacing-sm) * -1) 0 0 0;
+.passwordGroup {
+  margin-bottom: 22px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 2px;
+}
+
+.input {
+  width: 100%;
+  padding: 3px 7px;
+  border: 1px solid #a6a6a6;
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 19px;
+  box-sizing: border-box;
+}
+
+.passwordHint {
+  font-size: 11px;
+  color: #767676;
+  margin-top: 2px;
 }
 
 .submitButton {
-  margin-top: var(--spacing-md);
+  width: 100%;
+  padding: 8px;
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 29px;
+  text-align: center;
+  color: #0f1111;
+  margin-bottom: 14px;
+}
+
+.submitButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .forgotPassword {
-  text-align: center;
-  margin-top: var(--spacing-sm);
+  text-align: left;
+  margin-bottom: 14px;
 }
 
 .forgotLink {
-  color: var(--color-accent);
+  color: #0066c0;
+  font-size: 13px;
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  transition: var(--transition-fast);
-}
-
-.forgotLink:hover {
-  color: var(--color-accent-dark);
-  text-decoration: underline;
 }
 
 .divider {
-  position: relative;
-  margin: var(--spacing-xl) 0;
   text-align: center;
+  font-size: 12px;
+  color: #767676;
+  margin: 22px 0 14px 0;
+  position: relative;
 }
 
-.divider::before {
-  content: '';
+.dividerLine {
+  border-top: 1px solid #e7e7e7;
   position: absolute;
   top: 50%;
   left: 0;
   right: 0;
-  height: 1px;
-  background-color: var(--border-medium);
 }
 
 .dividerText {
-  background-color: var(--bg-primary);
-  padding: 0 var(--spacing-md);
-  color: var(--text-tertiary);
-  font-size: var(--font-size-sm);
-}
-
-.socialLogin {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.socialButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-}
-
-.socialIcon {
-  width: 20px;
-  height: 20px;
-}
-
-.footer {
-  margin-top: var(--spacing-xl);
-  text-align: center;
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-light);
-}
-
-.footerText {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.registerLink {
-  color: var(--color-accent);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  transition: var(--transition-fast);
-}
-
-.registerLink:hover {
-  color: var(--color-accent-dark);
-  text-decoration: underline;
-}
-
-.benefits {
-  padding: var(--spacing-xl);
-}
-
-.benefitsTitle {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-xl) 0;
-}
-
-.benefitsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.benefitsList li {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
+  background-color: white;
+  padding: 0 8px;
   position: relative;
-  padding-left: var(--spacing-xl);
 }
 
-.benefitsList li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  color: var(--color-success);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-lg);
+.createAccountLink {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background-color: #f7f8fa;
+  border: 1px solid #adb1b8;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 29px;
+  text-align: center;
+  color: #0f1111;
+  text-decoration: none;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+  cursor: pointer;
 }
 
-@media (max-width: 1024px) {
-  .container {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
-  }
-  
-  .benefits {
-    order: -1;
-    text-align: center;
-  }
+.demoCredentials {
+  margin-top: 16px;
+  padding: 14px;
+  background-color: #f7f8fa;
+  border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
-@media (max-width: 768px) {
-  .loginPage {
-    padding: var(--spacing-md);
-  }
-  
-  .loginCard {
-    padding: var(--spacing-xl);
-  }
-  
-  .benefits {
-    padding: var(--spacing-lg);
-  }
-  
-  .benefitsTitle {
-    font-size: var(--font-size-xl);
-  }
+.demoTitle {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #0f1111;
+}
+
+.demoText {
+  margin: 0;
+  font-size: 12px;
+  color: #565959;
 }

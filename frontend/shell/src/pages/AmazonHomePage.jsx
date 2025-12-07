@@ -7,7 +7,50 @@ const AmazonHomePage = () => {
   const [deals, setDeals] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // Mock data
+  // Fetch data from API
+  useEffect(() => {
+    fetchProducts();
+    fetchDeals();
+    fetchCategories();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products?limit=8');
+      const data = await response.json();
+      if (data.success) {
+        setProducts(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  const fetchDeals = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products?sort=discount&limit=4');
+      const data = await response.json();
+      if (data.success) {
+        setDeals(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products/categories');
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  // Static banner data
   const banners = [
     {
       id: 1,
@@ -68,48 +111,8 @@ const AmazonHomePage = () => {
     }
   ];
 
-  const todaysDeals = [
-    {
-      id: 1,
-      name: 'Samsung Galaxy M14 5G',
-      image: 'https://m.media-amazon.com/images/I/81vDZyJQ-4L._AC_SY200_.jpg',
-      price: 13490,
-      originalPrice: 16990,
-      discount: 21,
-      rating: 4.0,
-      timeLeft: '23:45:30'
-    },
-    {
-      id: 2,
-      name: 'boAt Airdopes 141',
-      image: 'https://m.media-amazon.com/images/I/31BMd11KciL._AC_SY200_.jpg',
-      price: 1299,
-      originalPrice: 2990,
-      discount: 57,
-      rating: 4.1,
-      timeLeft: '15:20:45'
-    },
-    {
-      id: 3,
-      name: 'Prestige Mixer Grinder',
-      image: 'https://m.media-amazon.com/images/I/41QrnytzVVL._AC_SY200_.jpg',
-      price: 3999,
-      originalPrice: 6495,
-      discount: 38,
-      rating: 4.2,
-      timeLeft: '08:30:15'
-    },
-    {
-      id: 4,
-      name: 'Fossil Gen 6 Smartwatch',
-      image: 'https://m.media-amazon.com/images/I/61ZjlBOp+rL._AC_SY200_.jpg',
-      price: 12495,
-      originalPrice: 22995,
-      discount: 46,
-      rating: 4.3,
-      timeLeft: '12:15:30'
-    }
-  ];
+  // Use deals from API or fallback to empty array
+  const todaysDeals = deals.length > 0 ? deals : [];
 
   const topBrands = [
     { name: 'Samsung', image: 'https://images-eu.ssl-images-amazon.com/images/G/31/img17/Mobile/Jupiter/MSO/B08N5WRWNW-edit._SY232_CB667322346_.jpg' },
@@ -200,33 +203,35 @@ const AmazonHomePage = () => {
           </div>
           
           <div className="deals-grid">
-            {todaysDeals.map((deal) => (
-              <div key={deal.id} className="deal-card">
+            {deals.map((deal) => (
+              <div key={deal._id} className="deal-card">
                 <div className="deal-badge">
-                  <span className="discount">{deal.discount}% off</span>
+                  <span className="discount">{deal.discount || 0}% off</span>
                   <span className="deal-label">Deal of the Day</span>
                 </div>
                 
                 <div className="deal-image">
-                  <img src={deal.image} alt={deal.name} />
+                  <img src={deal.image || 'https://via.placeholder.com/200x150'} alt={deal.name} />
                 </div>
                 
                 <div className="deal-info">
                   <div className="deal-timer">
                     <span className="timer-icon">⏰</span>
-                    <span className="time-left">{deal.timeLeft}</span>
+                    <span className="time-left">Limited Time</span>
                   </div>
                   
                   <div className="deal-pricing">
                     <span className="deal-price">{formatPrice(deal.price)}</span>
-                    <span className="original-price">{formatPrice(deal.originalPrice)}</span>
+                    {deal.originalPrice && (
+                      <span className="original-price">{formatPrice(deal.originalPrice)}</span>
+                    )}
                   </div>
                   
                   <div className="deal-rating">
                     <div className="stars">
-                      {renderStars(deal.rating)}
+                      {renderStars(deal.rating?.average || 0)}
                     </div>
-                    <span className="rating-text">({deal.rating})</span>
+                    <span className="rating-text">({deal.rating?.average || 0})</span>
                   </div>
                   
                   <h3 className="deal-name">{deal.name}</h3>
@@ -306,22 +311,24 @@ const AmazonHomePage = () => {
           
           <div className="products-carousel">
             <div className="carousel-track">
-              {todaysDeals.map((product) => (
-                <div key={product.id} className="product-card">
+              {products.slice(0, 8).map((product) => (
+                <div key={product._id} className="product-card">
                   <div className="product-image">
-                    <img src={product.image} alt={product.name} />
+                    <img src={product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
                   </div>
                   <div className="product-info">
                     <h4>{product.name}</h4>
                     <div className="product-rating">
                       <div className="stars">
-                        {renderStars(product.rating)}
+                        {renderStars(product.rating?.average || 0)}
                       </div>
-                      <span>({product.rating})</span>
+                      <span>({product.rating?.average || 0})</span>
                     </div>
                     <div className="product-price">
                       <span className="current-price">{formatPrice(product.price)}</span>
-                      <span className="original-price">{formatPrice(product.originalPrice)}</span>
+                      {product.originalPrice && (
+                        <span className="original-price">{formatPrice(product.originalPrice)}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -339,10 +346,10 @@ const AmazonHomePage = () => {
           </div>
           
           <div className="recommendations-grid">
-            {todaysDeals.slice(0, 8).map((product) => (
-              <div key={product.id} className="recommendation-card">
+            {products.slice(0, 8).map((product) => (
+              <div key={product._id} className="recommendation-card">
                 <div className="product-image">
-                  <img src={product.image} alt={product.name} />
+                  <img src={product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
                   <div className="quick-actions">
                     <button className="wishlist-btn">♡</button>
                     <button className="compare-btn">⚖</button>
@@ -352,21 +359,25 @@ const AmazonHomePage = () => {
                   <h4>{product.name}</h4>
                   <div className="product-rating">
                     <div className="stars">
-                      {renderStars(product.rating)}
+                      {renderStars(product.rating?.average || 0)}
                     </div>
-                    <span>({product.rating})</span>
+                    <span>({product.rating?.average || 0})</span>
                   </div>
                   <div className="product-price">
                     <span className="current-price">{formatPrice(product.price)}</span>
-                    <span className="original-price">{formatPrice(product.originalPrice)}</span>
-                    <span className="discount">({product.discount}% off)</span>
+                    {product.originalPrice && (
+                      <span className="original-price">{formatPrice(product.originalPrice)}</span>
+                    )}
+                    {product.discount && (
+                      <span className="discount">({product.discount}% off)</span>
+                    )}
                   </div>
                   <div className="delivery-info">
                     <span className="free-delivery">FREE Delivery</span>
                   </div>
                 </div>
               </div>
-            ))}
+            ))
           </div>
         </div>
       </section>

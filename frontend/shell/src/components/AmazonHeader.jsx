@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './AmazonHeader.css';
+import { Link } from 'react-router-dom';
 
 const AmazonHeader = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,7 +157,7 @@ const AmazonHeader = () => {
                 <div className="account-dropdown">
                   {!user.isLoggedIn ? (
                     <div className="signin-section">
-                      <button className="signin-button">Sign In</button>
+                    <Link   to="/login" className="signin-button">Sign In </Link>
                       <p>New customer? <a href="/register">Start here.</a></p>
                     </div>
                   ) : (
