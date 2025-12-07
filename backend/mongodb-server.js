@@ -287,6 +287,40 @@ app.post('/api/auth/refresh', (req, res) => {
   }
 });
 
+const resetTokens = new Map();
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    resetTokens.set(email, resetToken);
+    res.json({ success: true, message: 'Password reset link sent', resetToken });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to process request' });
+  }
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const storedToken = resetTokens.get(decoded.email);
+    if (storedToken !== token) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.updateOne({ email: decoded.email }, { password: hashedPassword });
+    resetTokens.delete(decoded.email);
+    res.json({ success: true, message: 'Password reset successful' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: 'Invalid or expired token' });
+  }
+});
+
 // PRODUCT ROUTES
 app.get('/api/products', async (req, res) => {
   try {
