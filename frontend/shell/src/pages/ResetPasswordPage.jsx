@@ -7,6 +7,7 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -32,8 +33,8 @@ const ResetPasswordPage = () => {
 
       if (response.ok) {
         localStorage.removeItem('resetToken');
-        alert('Password reset successful!');
-        navigate('/login');
+        setToast('Password reset successful!');
+        setTimeout(() => navigate('/login'), 2000);
       } else {
         setError(data.message || 'Failed to reset password');
       }
@@ -78,6 +79,11 @@ const ResetPasswordPage = () => {
           </button>
         </form>
       </div>
+      {toast && (
+        <div className={styles.toast}>
+          <span>✓</span> {toast}
+        </div>
+      )}
     </div>
   );
 };
