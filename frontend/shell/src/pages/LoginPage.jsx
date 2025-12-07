@@ -93,13 +93,9 @@ const LoginPage = () => {
           </button>
           
           <div className={styles.forgotPassword}>
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={styles.forgotLink}
-            >
+            <Link to="/forgot-password" className={styles.forgotLink}>
               Forgot your password?
-            </a>
+            </Link>
           </div>
         </form>
         
