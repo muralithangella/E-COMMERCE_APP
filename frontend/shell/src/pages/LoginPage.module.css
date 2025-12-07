@@ -112,6 +112,43 @@
   text-decoration: none;
 }
 
+.ssoSection {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.googleButton {
+  width: 100%;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c4043;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 14px;
+}
+
+.googleButton:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.newUserSection {
+  display: flex;
+  align-items: center;
+  margin: 22px 0 14px 0;
+  gap: 10px;
+}
+
 .divider {
   text-align: center;
   font-size: 12px;
@@ -121,17 +158,15 @@
 }
 
 .dividerLine {
+  flex: 1;
   border-top: 1px solid #e7e7e7;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
 }
 
 .dividerText {
-  background-color: white;
+  font-size: 12px;
+  color: #767676;
   padding: 0 8px;
-  position: relative;
+  white-space: nowrap;
 }
 
 .createAccountLink {
