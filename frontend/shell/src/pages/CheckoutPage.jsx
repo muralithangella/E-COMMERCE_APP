@@ -508,36 +508,61 @@ const CheckoutPage = () => {
             }}>
               <h3 style={{ margin: '0 0 20px 0' }}>Order Summary</h3>
               
-              {cartItems.map(item => (
-                <div key={item.id} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '16px',
-                  paddingBottom: '16px',
-                  borderBottom: '1px solid #eee'
-                }}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      objectFit: 'cover',
-                      borderRadius: '4px',
-                      marginRight: '12px'
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <h5 style={{ margin: '0 0 4px 0', fontSize: '14px' }}>{item.name}</h5>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
-                      Qty: {item.quantity} × ${item.price}
-                    </p>
+              {cartItems.map(item => {
+                const imageData = ProductService.getProductImage(item);
+                const isPlaceholder = imageData?.type === 'placeholder';
+                
+                return (
+                  <div key={item.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '16px',
+                    paddingBottom: '16px',
+                    borderBottom: '1px solid #eee'
+                  }}>
+                    {isPlaceholder ? (
+                      <div style={{
+                        width: '60px',
+                        height: '60px',
+                        backgroundColor: imageData.backgroundColor,
+                        borderRadius: '4px',
+                        marginRight: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px'
+                      }}>
+                        {imageData.icon}
+                      </div>
+                    ) : (
+                      <img
+                        src={item.image || 'https://via.placeholder.com/60x60?text=Product'}
+                        alt={item.name}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          objectFit: 'cover',
+                          borderRadius: '4px',
+                          marginRight: '12px'
+                        }}
+                      />
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <h5 style={{ margin: '0 0 4px 0', fontSize: '14px' }}>{item.name}</h5>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                        Qty: {item.quantity} × {ProductService.formatPrice(item.price)}
+                      </p>
+                    </div>
+                    <div style={{ fontWeight: 'bold' }}>
+                      {ProductService.formatPrice(item.price * item.quantity)}
+                    </div>
                   </div>
-                  <div style={{ fontWeight: 'bold' }}>
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               
               <div style={{ borderTop: '2px solid #eee', paddingTop: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>

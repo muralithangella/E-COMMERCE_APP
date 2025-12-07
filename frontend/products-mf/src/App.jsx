@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Toast from './components/Toast';
 
 const API_BASE = 'http://localhost:5010';
 
@@ -76,6 +77,7 @@ const App = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -103,9 +105,9 @@ const App = () => {
       if (!response.ok) throw new Error('Failed to add to cart');
       
       const result = await response.json();
-      alert(result.message);
+      setToast({ message: result.message || `${product.name} added to cart!`, type: 'success' });
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      setToast({ message: `Error: ${err.message}`, type: 'error' });
     }
   }, []);
 
@@ -162,7 +164,8 @@ const App = () => {
   );
 
   return (
-    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh', padding: '20px 0' }}>
+    <>
+      <div style={{ backgroundColor: '#eaeded', minHeight: '100vh', padding: '20px 0' }}>
       <div style={{ maxWidth: '1500px', margin: '0 auto', padding: '0 20px' }}>
         {/* Breadcrumb */}
         <div style={{ marginBottom: '20px', fontSize: '14px' }}>
@@ -216,6 +219,14 @@ const App = () => {
         )}
       </div>
     </div>
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    )}
+    </>
   );
 };
 

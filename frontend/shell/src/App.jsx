@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import HomePage from './pages/HomePage.jsx';
@@ -15,7 +16,9 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 
 const App = () => {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#eaeded' }}>
+    <>
+      <Toaster position="top-right" />
+      <div style={{ minHeight: '100vh', backgroundColor: '#eaeded' }}>
       <Header />
       <main>
         <Routes>
@@ -34,6 +37,7 @@ const App = () => {
       </main>
       <Footer />
     </div>
+    </>
   );
 };
 

@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema({
     reserved: { type: Number, default: 0 }
   },
   rating: { average: { type: Number, default: 0 }, count: { type: Number, default: 0 } },
+  discount: { type: Number, default: 0, min: 0 },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

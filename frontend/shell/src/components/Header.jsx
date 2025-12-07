@@ -222,15 +222,15 @@ const Header = () => {
             <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fresh</a>
             <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>MX Player</a>
             <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Sell</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Bestsellers</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Mobiles</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Today's Deals</a>
+            <a href="/products?sort=bestsellers" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Bestsellers</a>
+            <a href="/products?category=mobiles" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Mobiles</a>
+            <a href="/products?sort=deals" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Today's Deals</a>
             <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Customer Service</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Prime</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Electronics</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fashion</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Home & Kitchen</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Books</a>
+            <a href="/products?filter=prime" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Prime</a>
+            <a href="/products?category=electronics" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Electronics</a>
+            <a href="/products?category=fashion" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fashion</a>
+            <a href="/products?category=home" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Home & Kitchen</a>
+            <a href="/products?category=books" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Books</a>
           </div>
         </div>
       </header>

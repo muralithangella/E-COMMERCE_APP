@@ -391,7 +391,8 @@ app.get('/api/auth/google/callback',
 // PRODUCT ROUTES
 app.get('/api/products', async (req, res) => {
   try {
-    const { category, search, page = 1, limit = 20 } = req.query;
+    const { category, search, sort, page = 1, limit = 20, minPrice, maxPrice } = req.query;
+    console.log('Products API - Query params:', { category, search, sort, page, limit, minPrice, maxPrice });
     let query = {};
     
     if (category && category !== 'all') {
@@ -405,11 +406,53 @@ app.get('/api/products', async (req, res) => {
       ];
     }
     
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    console.log('Products API - MongoDB query:', JSON.stringify(query));
+    
+    // Handle sorting
+    let sortOption = {};
+    switch(sort) {
+      case 'price-asc':
+        sortOption = { price: 1 };
+        break;
+      case 'price-desc':
+        sortOption = { price: -1 };
+        break;
+      case 'rating':
+        sortOption = { rating: -1 };
+        break;
+      case 'newest':
+        sortOption = { _id: -1 };
+        break;
+      case 'name-asc':
+        sortOption = { name: 1 };
+        break;
+      case 'name-desc':
+        sortOption = { name: -1 };
+        break;
+      case 'discount':
+        sortOption = { discount: -1 };
+        break;
+      case 'popularity':
+        sortOption = { reviews: -1 };
+        break;
+      case 'relevance':
+      default:
+        sortOption = { rating: -1, reviews: -1 };
+        break;
+    }
+    
     const products = await Product.find(query)
+      .sort(sortOption)
       .limit(limit * 1)
       .skip((page - 1) * limit);
     
     const total = await Product.countDocuments(query);
+    console.log('Products API - Found products:', products.length, 'Total:', total);
     
     res.json({
       success: true,

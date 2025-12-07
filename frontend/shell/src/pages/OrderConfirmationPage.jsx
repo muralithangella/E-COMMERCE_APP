@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import ProductService from '../services/productService';
 
 const OrderConfirmationPage = () => {
   const [searchParams] = useSearchParams();
@@ -52,25 +53,54 @@ const OrderConfirmationPage = () => {
           
           <div style={{ marginBottom: '20px' }}>
             <h3>Items Ordered:</h3>
-            {orderDetails.items.map(item => (
-              <div key={item.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px 0',
-                borderBottom: '1px solid #eee'
-              }}>
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  style={{ width: '60px', height: '60px', objectFit: 'cover', marginRight: '12px', borderRadius: '4px' }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                  <div style={{ color: '#666' }}>Qty: {item.quantity}</div>
+            {orderDetails.items.map(item => {
+              const imageData = ProductService.getProductImage(item);
+              const isPlaceholder = imageData?.type === 'placeholder';
+              
+              return (
+                <div key={item.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px 0',
+                  borderBottom: '1px solid #eee'
+                }}>
+                  {isPlaceholder ? (
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: imageData.backgroundColor,
+                      borderRadius: '4px',
+                      marginRight: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px'
+                    }}>
+                      {imageData.icon}
+                    </div>
+                  ) : (
+                    <img 
+                      src={item.image || 'https://via.placeholder.com/60x60?text=Product'} 
+                      alt={item.name} 
+                      onError={(e) => {
+                        const placeholder = ProductService.getProductImage(item);
+                        e.target.style.display = 'none';
+                        const div = document.createElement('div');
+                        div.style.cssText = `width: 60px; height: 60px; background-color: ${placeholder.backgroundColor}; border-radius: 4px; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;`;
+                        div.textContent = placeholder.icon;
+                        e.target.parentNode.insertBefore(div, e.target);
+                      }}
+                      style={{ width: '60px', height: '60px', objectFit: 'cover', marginRight: '12px', borderRadius: '4px' }}
+                    />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                    <div style={{ color: '#666' }}>Qty: {item.quantity}</div>
+                  </div>
+                  <div style={{ fontWeight: 'bold' }}>{ProductService.formatPrice(item.price * item.quantity)}</div>
                 </div>
-                <div style={{ fontWeight: 'bold' }}>₹{(item.price * item.quantity).toFixed(2)}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -96,15 +126,15 @@ const OrderConfirmationPage = () => {
           <div style={{ borderTop: '1px solid #eee', paddingTop: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span>Subtotal:</span>
-              <span>₹{orderDetails.subtotal.toFixed(2)}</span>
+              <span>{ProductService.formatPrice(orderDetails.subtotal)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span>Shipping:</span>
-              <span>{orderDetails.shipping === 0 ? 'FREE' : `₹${orderDetails.shipping.toFixed(2)}`}</span>
+              <span>{orderDetails.shipping === 0 ? 'FREE' : ProductService.formatPrice(orderDetails.shipping)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span>Tax:</span>
-              <span>₹{orderDetails.tax.toFixed(2)}</span>
+              <span>{ProductService.formatPrice(orderDetails.tax)}</span>
             </div>
             <div style={{
               display: 'flex',
@@ -115,7 +145,7 @@ const OrderConfirmationPage = () => {
               paddingTop: '8px'
             }}>
               <span>Total:</span>
-              <span>₹{orderDetails.total.toFixed(2)}</span>
+              <span>{ProductService.formatPrice(orderDetails.total)}</span>
             </div>
           </div>
         </div>

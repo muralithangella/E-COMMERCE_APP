@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Toast from './Toast';
 
 const ProductCard = ({ product }) => {
+  const [toast, setToast] = useState(null);
+
   const handleAddToCart = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/cart/add', {
@@ -15,15 +18,16 @@ const ProductCard = ({ product }) => {
       });
       
       if (response.ok) {
-        alert('Added to cart!');
+        setToast({ message: `${product.name} added to cart!`, type: 'success' });
       }
     } catch (error) {
-      alert('Error adding to cart');
+      setToast({ message: 'Error adding to cart', type: 'error' });
     }
   };
 
   return (
-    <div className="product-card">
+    <>
+      <div className="product-card">
       <div className="product-image">
         <img 
           src={product.image || product.images?.[0] || 'https://picsum.photos/300/200'} 
@@ -46,6 +50,14 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
     </div>
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    )}
+    </>
   );
 };
 

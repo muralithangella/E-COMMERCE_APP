@@ -48,7 +48,19 @@ const categories = [
 
 // Homepage API endpoints
 app.get('/api/products', (req, res) => {
-  res.json(products);
+  const { minPrice, maxPrice, sort } = req.query;
+  let filtered = [...products];
+  
+  if (minPrice) filtered = filtered.filter(p => p.price >= Number(minPrice));
+  if (maxPrice) filtered = filtered.filter(p => p.price <= Number(maxPrice));
+  
+  if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+  else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+  else if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+  else if (sort === 'name-asc') filtered.sort((a, b) => a.name.localeCompare(b.name));
+  else if (sort === 'name-desc') filtered.sort((a, b) => b.name.localeCompare(a.name));
+  
+  res.json(filtered);
 });
 
 app.get('/api/categories', (req, res) => {

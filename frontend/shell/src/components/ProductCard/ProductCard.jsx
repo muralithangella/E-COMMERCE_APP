@@ -39,7 +39,7 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
   return (
     <div 
       style={{ 
-        minWidth: cardWidth,
+        width: '100%',
         maxWidth: cardWidth,
         backgroundColor: 'white',
         border: '1px solid #D5D9D9',
@@ -47,7 +47,8 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
         padding: '16px',
         cursor: 'pointer',
         transition: 'all 0.15s ease-in-out',
-        position: 'relative'
+        position: 'relative',
+        boxSizing: 'border-box'
       }}
       onClick={handleProductClick}
       onMouseEnter={(e) => {
@@ -59,7 +60,7 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      <div style={{ position: 'relative', marginBottom: '12px' }}>
+      <div style={{ position: 'relative', marginBottom: '12px', width: '100%', overflow: 'hidden' }}>
         <div
           style={{ 
             width: '100%', 
@@ -76,7 +77,8 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
             textAlign: 'center',
             padding: '16px',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            boxSizing: 'border-box'
           }}
         >
           <div style={{ 
