@@ -53,7 +53,7 @@ const FilterSidebar = ({ filters, actions }) => {
             placeholder="Min"
             value={minInput}
             onChange={(e) => setMinInput(e.target.value)}
-            style={{ width: '100%', padding: '6px', border: '1px solid #888', borderRadius: '3px', fontSize: '13px' }}
+            style={{ width: '70px', padding: '6px', border: '1px solid #888', borderRadius: '3px', fontSize: '13px' }}
           />
           <span style={{ color: '#888' }}>to</span>
           <input 
@@ -61,13 +61,13 @@ const FilterSidebar = ({ filters, actions }) => {
             placeholder="Max"
             value={maxInput}
             onChange={(e) => setMaxInput(e.target.value)}
-            style={{ width: '100%', padding: '6px', border: '1px solid #888', borderRadius: '3px', fontSize: '13px' }}
+            style={{ width: '70px', padding: '6px', border: '1px solid #888', borderRadius: '3px', fontSize: '13px' }}
           />
         </div>
         <button 
           onClick={handleCustomApply}
           style={{ 
-            width: '100%', 
+            width: '160px', 
             padding: '6px', 
             backgroundColor: '#f0c14b', 
             border: '1px solid #a88734',

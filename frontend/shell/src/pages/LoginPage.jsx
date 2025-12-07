@@ -15,7 +15,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://localhost:8080/api/auth/login', {
         email,
         password
       }, {
@@ -106,7 +106,7 @@ const LoginPage = () => {
         </div>
         
         <button
-          onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+          onClick={() => window.location.href = 'https://localhost:8080/api/auth/google'}
           className={styles.googleButton}
         >
           <svg width="18" height="18" viewBox="0 0 18 18">

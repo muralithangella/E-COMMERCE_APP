@@ -1,5 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -26,7 +29,7 @@ const limiter = rateLimit({
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  origin: ['http://localhost:3000', 'http://www.localhost:3000', 'https://localhost:3000', 'https://www.localhost:3000', 'https://localhost:3001', 'https://localhost:3002', 'https://localhost:3003'],
   credentials: true
 }));
 app.use(compression());
@@ -139,6 +142,9 @@ const Category = mongoose.model('Category', categorySchema);
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
+    protocol: req.protocol,
+    secure: req.secure,
+    encrypted: req.connection.encrypted ? 'Yes' : 'No',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
@@ -705,10 +711,26 @@ async function initializeDatabase() {
 }
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`✅ MongoDB Server running on http://localhost:${PORT}`);
-  console.log(`🔐 Login: admin@example.com / admin123`);
-  initializeDatabase();
-});
+const certPath = path.join(__dirname, 'certs/cert.pem');
+const keyPath = path.join(__dirname, 'certs/key.pem');
+
+if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+  const options = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath)
+  };
+  https.createServer(options, app).listen(PORT, () => {
+    console.log(`✅ MongoDB Server running on https://localhost:${PORT}`);
+    console.log(`🔐 Login: admin@example.com / admin123`);
+    console.log(`🔒 HTTPS enabled - All traffic encrypted`);
+    initializeDatabase();
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`✅ MongoDB Server running on http://localhost:${PORT} (SSL certs not found)`);
+    console.log(`🔐 Login: admin@example.com / admin123`);
+    initializeDatabase();
+  });
+}
 
 module.exports = app;
