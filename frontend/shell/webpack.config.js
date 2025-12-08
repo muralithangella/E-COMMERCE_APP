@@ -9,7 +9,7 @@ module.exports = {
     proxy: [
       {
         context: ['/api'],
-        target: 'https://localhost:9000',
+        target: 'https://localhost:8080',
         changeOrigin: false,
         secure: false,
         cookieDomainRewrite: 'localhost',
