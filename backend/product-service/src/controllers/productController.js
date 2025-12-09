@@ -5,6 +5,10 @@ exports.getProducts = async (req, res) => {
   try {
     const { category, search, brand, minPrice, maxPrice, rating, sort, page = 1, limit = 16 } = req.query;
     
+    // Input validation
+    const sanitizedPage = Math.max(1, parseInt(page) || 1);
+    const sanitizedLimit = Math.min(100, Math.max(1, parseInt(limit) || 16));
+    
     let query = { isActive: true };
     
     if (category && category !== 'all') {
@@ -65,14 +69,14 @@ exports.getProducts = async (req, res) => {
         sortQuery = { createdAt: -1 };
     }
     
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (sanitizedPage - 1) * sanitizedLimit;
     
     const [products, total] = await Promise.all([
       Product.find(query)
         .select('+images')
         .sort(sortQuery)
         .skip(skip)
-        .limit(parseInt(limit))
+        .limit(sanitizedLimit)
         .lean(),
       Product.countDocuments(query)
     ]);
@@ -80,14 +84,14 @@ exports.getProducts = async (req, res) => {
     console.log('First product from DB:', JSON.stringify(products[0], null, 2));
     console.log('First product has images:', products[0]?.images);
     
-    const pages = Math.ceil(total / parseInt(limit));
+    const pages = Math.ceil(total / sanitizedLimit);
     
     res.json({
       success: true,
       data: products,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: sanitizedPage,
+        limit: sanitizedLimit,
         total,
         pages
       }

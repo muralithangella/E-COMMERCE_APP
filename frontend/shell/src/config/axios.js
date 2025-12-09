@@ -30,4 +30,6 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+axiosInstance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
 export default axiosInstance;
