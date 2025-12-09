@@ -29,6 +29,11 @@ const CartPage = () => {
     navigate('/products');
   }, [navigate]);
 
+  const handleClearCart = useCallback(() => {
+    dispatch({ type: 'cart/clearCart' });
+    localStorage.removeItem('cart');
+  }, [dispatch]);
+
   if (!items?.length) {
     return (
       <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'white', margin: '20px', borderRadius: '8px' }}>
@@ -56,7 +61,10 @@ const CartPage = () => {
   return (
     <div style={{ backgroundColor: '#f3f3f3', minHeight: '100vh', padding: '20px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '20px' }}>Shopping Cart ({count} items)</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h1 style={{ margin: 0 }}>Shopping Cart ({count} items)</h1>
+          <button onClick={handleClearCart} style={{ padding: '8px 16px', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Clear Cart</button>
+        </div>
         
         <div style={{ display: 'flex', gap: '20px' }}>
           <div style={{ flex: 2 }}>
@@ -71,9 +79,10 @@ const CartPage = () => {
                 gap: '16px'
               }}>
                 <img 
-                  src={item.image} 
+                  src={item.images?.[0]?.url || item.image || 'https://via.placeholder.com/100x100/F0F0F0/999999?text=Product'} 
                   alt={item.name} 
                   style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }}
+                  onError={(e) => { e.target.src = 'https://via.placeholder.com/100x100/F0F0F0/999999?text=Product'; }}
                 />
                 <div style={{ flex: 1 }}>
                   <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>{item.name}</h3>

@@ -15,7 +15,7 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
       id: product.id || product._id,
       name: product.name || 'Product',
       price: product.price || 0,
-      image: null,
+      images: product.images || [],
       category: product.category,
       quantity: 1
     }));
