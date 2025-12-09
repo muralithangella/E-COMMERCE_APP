@@ -5,10 +5,13 @@ const client = redis.createClient({
   socket: { reconnectStrategy: (retries) => Math.min(retries * 50, 500) }
 });
 
-client.connect().catch(console.error);
+let redisAvailable = false;
+client.connect()
+  .then(() => { redisAvailable = true; })
+  .catch(() => { console.log('Redis cache disabled'); });
 
 module.exports = (duration) => async (req, res, next) => {
-  if (req.method !== 'GET') return next();
+  if (req.method !== 'GET' || !redisAvailable) return next();
   
   const key = `cache:${req.originalUrl}`;
   
@@ -20,7 +23,7 @@ module.exports = (duration) => async (req, res, next) => {
     
     res.originalJson = res.json;
     res.json = function(data) {
-      client.setEx(key, duration, JSON.stringify(data)).catch(console.error);
+      client.setEx(key, duration, JSON.stringify(data)).catch(() => {});
       res.originalJson(data);
     };
     next();

@@ -7,7 +7,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
 const redis = require('redis');
 const productRoutes = require('./routes/productRoutes');
 const errorHandler = require('./middleware/errorHandler');
@@ -21,14 +20,13 @@ const redisClient = redis.createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: { reconnectStrategy: (retries) => Math.min(retries * 50, 500) }
 });
-redisClient.connect().catch(console.error);
+redisClient.connect().catch(() => console.log('Redis not available, using memory store'));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ client: redisClient, prefix: 'rl:' }),
   message: { success: false, message: 'Too many requests' }
 });
 
@@ -125,7 +123,7 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM received, closing gracefully');
   server.close(() => {
     mongoose.connection.close(false, () => {
-      redisClient.quit();
+      redisClient.quit().catch(() => {});
       process.exit(0);
     });
   });
