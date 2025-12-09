@@ -1,32 +1,39 @@
 const express = require('express');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5002;
 
-app.use(cors());
-app.use(express.json());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 2000,
+  message: { success: false, message: 'Too many requests' }
+});
+
+app.use(helmet());
+app.use(compression({ level: 6 }));
+app.use(cors({ credentials: true }));
+app.use(express.json({ limit: '5mb' }));
+app.use(limiter);
 app.use('/api/cart', cartRoutes);
 
-const certPath = path.join(__dirname, '../../certs/cert.pem');
-const keyPath = path.join(__dirname, '../../certs/key.pem');
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'cart', worker: process.pid });
+});
 
-if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-  const options = {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath)
-  };
-  https.createServer(options, app).listen(PORT, () => {
-    console.log(`Cart Service running on HTTPS port ${PORT}`);
-  });
-} else {
-  app.listen(PORT, () => {
-    console.log(`Cart Service running on HTTP port ${PORT} (SSL certs not found)`);
-  });
-}
+const server = app.listen(PORT, () => {
+  console.log(`[Worker ${process.pid}] Cart Service on port ${PORT}`);
+});
+
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
+
+process.on('SIGTERM', () => {
+  server.close(() => process.exit(0));
+});
 
 module.exports = app;
