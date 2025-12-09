@@ -4,7 +4,7 @@
   "description": "Clean E-commerce Microservices Application",
   "main": "backend/fixed-server.js",
   "scripts": {
-    "start": "node backend/mongodb-server.js",
+    "start": "cd backend/product-service && npm start",
     "start:basic": "node backend/server.js",
     "dev": "nodemon backend/amazon-server.js",
     "start:shell": "cd frontend/shell && npm start",

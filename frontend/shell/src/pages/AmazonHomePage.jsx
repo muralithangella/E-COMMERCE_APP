@@ -1,54 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import './AmazonHomePage.css';
+import { 
+  useGetProductsQuery, 
+  useGetDealsQuery, 
+  useGetCategoriesQuery,
+  useGetRecommendationsQuery,
+  useGetRecentlyViewedQuery
+} from '../store/api/apiSlice';
 
 const AmazonHomePage = () => {
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [products, setProducts] = useState([]);
-  const [deals, setDeals] = useState([]);
-  const [categories, setCategories] = useState([]);
 
-  // Fetch data from API
-  useEffect(() => {
-    fetchProducts();
-    fetchDeals();
-    fetchCategories();
-  }, []);
+  const { data: productsData } = useGetProductsQuery({ limit: 8 });
+  const { data: dealsData } = useGetDealsQuery();
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: recommendationsData } = useGetRecommendationsQuery();
+  const { data: recentlyViewedData } = useGetRecentlyViewedQuery();
 
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/products?limit=8');
-      const data = await response.json();
-      if (data.success) {
-        setProducts(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  const fetchDeals = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/products?sort=discount&limit=4');
-      const data = await response.json();
-      if (data.success) {
-        setDeals(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching deals:', error);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/products/categories');
-      const data = await response.json();
-      if (data.success) {
-        setCategories(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
+  const products = productsData || [];
+  const deals = dealsData || [];
+  const categories = categoriesData || [];
 
   // Static banner data
   const banners = [
@@ -111,8 +82,10 @@ const AmazonHomePage = () => {
     }
   ];
 
-  // Use deals from API or fallback to empty array
+  // Use deals and recommendations from API
   const todaysDeals = deals.length > 0 ? deals : [];
+  const recommended = recommendationsData || [];
+  const recentlyViewed = recentlyViewedData || [];
 
   const topBrands = [
     { name: 'Samsung', image: 'https://images-eu.ssl-images-amazon.com/images/G/31/img17/Mobile/Jupiter/MSO/B08N5WRWNW-edit._SY232_CB667322346_.jpg' },
@@ -206,12 +179,12 @@ const AmazonHomePage = () => {
             {deals.map((deal) => (
               <div key={deal._id} className="deal-card">
                 <div className="deal-badge">
-                  <span className="discount">{deal.discount || 0}% off</span>
+                  <span className="discount">{deal.discount?.percentage || deal.discountPercentage || 0}% off</span>
                   <span className="deal-label">Deal of the Day</span>
                 </div>
                 
                 <div className="deal-image">
-                  <img src={deal.image || 'https://via.placeholder.com/200x150'} alt={deal.name} />
+                  <img src={deal.images?.[0]?.url || deal.image || 'https://via.placeholder.com/200x150'} alt={deal.name} />
                 </div>
                 
                 <div className="deal-info">
@@ -221,17 +194,17 @@ const AmazonHomePage = () => {
                   </div>
                   
                   <div className="deal-pricing">
-                    <span className="deal-price">{formatPrice(deal.price)}</span>
-                    {deal.originalPrice && (
-                      <span className="original-price">{formatPrice(deal.originalPrice)}</span>
+                    <span className="deal-price">{formatPrice(deal.price?.sale || deal.price?.regular || deal.price)}</span>
+                    {deal.price?.regular && (
+                      <span className="original-price">{formatPrice(deal.price.regular)}</span>
                     )}
                   </div>
                   
                   <div className="deal-rating">
                     <div className="stars">
-                      {renderStars(deal.rating?.average || 0)}
+                      {renderStars(deal.ratings?.average || 0)}
                     </div>
-                    <span className="rating-text">({deal.rating?.average || 0})</span>
+                    <span className="rating-text">({deal.ratings?.average || 0})</span>
                   </div>
                   
                   <h3 className="deal-name">{deal.name}</h3>
@@ -314,7 +287,7 @@ const AmazonHomePage = () => {
               {products.slice(0, 8).map((product) => (
                 <div key={product._id} className="product-card">
                   <div className="product-image">
-                    <img src={product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
+                    <img src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
                   </div>
                   <div className="product-info">
                     <h4>{product.name}</h4>
@@ -346,10 +319,10 @@ const AmazonHomePage = () => {
           </div>
           
           <div className="recommendations-grid">
-            {products.slice(0, 8).map((product) => (
+            {recommended.slice(0, 8).map((product) => (
               <div key={product._id} className="recommendation-card">
                 <div className="product-image">
-                  <img src={product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
+                  <img src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
                   <div className="quick-actions">
                     <button className="wishlist-btn">♡</button>
                     <button className="compare-btn">⚖</button>
@@ -359,17 +332,17 @@ const AmazonHomePage = () => {
                   <h4>{product.name}</h4>
                   <div className="product-rating">
                     <div className="stars">
-                      {renderStars(product.rating?.average || 0)}
+                      {renderStars(product.ratings?.average || 0)}
                     </div>
-                    <span>({product.rating?.average || 0})</span>
+                    <span>({product.ratings?.average || 0})</span>
                   </div>
                   <div className="product-price">
-                    <span className="current-price">{formatPrice(product.price)}</span>
-                    {product.originalPrice && (
-                      <span className="original-price">{formatPrice(product.originalPrice)}</span>
+                    <span className="current-price">{formatPrice(product.price?.sale || product.price?.regular || product.price)}</span>
+                    {product.price?.regular && (
+                      <span className="original-price">{formatPrice(product.price.regular)}</span>
                     )}
-                    {product.discount && (
-                      <span className="discount">({product.discount}% off)</span>
+                    {product.discount?.percentage && (
+                      <span className="discount">({product.discount.percentage}% off)</span>
                     )}
                   </div>
                   <div className="delivery-info">
@@ -377,10 +350,40 @@ const AmazonHomePage = () => {
                   </div>
                 </div>
               </div>
-            ))
+            ))}
           </div>
         </div>
       </section>
+
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && (
+        <section className="recommendations">
+          <div className="container">
+            <div className="section-header">
+              <h2>Continue browsing</h2>
+            </div>
+            
+            <div className="recommendations-grid">
+              {recentlyViewed.map((product) => (
+                <div key={product._id} className="recommendation-card">
+                  <div className="product-image">
+                    <img src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/200x150'} alt={product.name} />
+                  </div>
+                  <div className="product-info">
+                    <h4>{product.name}</h4>
+                    <div className="product-price">
+                      <span className="current-price">{formatPrice(product.price?.sale || product.price?.regular || product.price)}</span>
+                      {product.price?.regular && (
+                        <span className="original-price">{formatPrice(product.price.regular)}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

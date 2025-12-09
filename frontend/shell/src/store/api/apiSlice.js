@@ -21,8 +21,11 @@ export const apiSlice = createApi({
         params,
       }),
       transformResponse: (response) => {
-        console.log('Products API response:', response);
-        return response?.data || response?.products || (Array.isArray(response) ? response : []);
+        console.log('Products RAW API response:', response);
+        const products = response?.data || response?.products || (Array.isArray(response) ? response : []);
+        console.log('Products after transform:', products);
+        console.log('First product images:', products[0]?.images);
+        return products;
       },
       providesTags: ['Product'],
     }),

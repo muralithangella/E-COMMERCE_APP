@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/imageUpload');
 
 exports.getProducts = async (req, res) => {
   try {
@@ -68,12 +69,16 @@ exports.getProducts = async (req, res) => {
     
     const [products, total] = await Promise.all([
       Product.find(query)
+        .select('+images')
         .sort(sortQuery)
         .skip(skip)
         .limit(parseInt(limit))
         .lean(),
       Product.countDocuments(query)
     ]);
+    
+    console.log('First product from DB:', JSON.stringify(products[0], null, 2));
+    console.log('First product has images:', products[0]?.images);
     
     const pages = Math.ceil(total / parseInt(limit));
     
@@ -113,5 +118,98 @@ exports.getCategories = async (req, res) => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch categories', error: error.message });
+  }
+};
+
+exports.uploadProductImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, 'products'));
+    const results = await Promise.all(uploadPromises);
+
+    const images = results.map((result, index) => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+      isPrimary: index === 0 && product.images.length === 0
+    }));
+
+    product.images.push(...images);
+    await product.save();
+
+    res.json({ success: true, data: product });
+  } catch (error) {
+    console.error('Error uploading images:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload images', error: error.message });
+  }
+};
+
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { id, imageId } = req.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const image = product.images.id(imageId);
+    if (!image) {
+      return res.status(404).json({ success: false, message: 'Image not found' });
+    }
+
+    await deleteFromCloudinary(image.publicId);
+    product.images.pull(imageId);
+    await product.save();
+
+    res.json({ success: true, message: 'Image deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete image', error: error.message });
+  }
+};
+
+exports.createProduct = async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ success: false, message: 'Failed to create product', error: error.message });
+  }
+};
+
+exports.updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.json({ success: true, data: product });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ success: false, message: 'Failed to update product', error: error.message });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const deletePromises = product.images.map(img => deleteFromCloudinary(img.publicId));
+    await Promise.all(deletePromises);
+
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Product and images deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete product', error: error.message });
   }
 };

@@ -65,46 +65,28 @@ const ProductCard = ({ product, onProductClick, size = 'medium' }) => {
           style={{ 
             width: '100%', 
             height: imageHeight, 
-            backgroundColor: imageData.backgroundColor || ProductService.getCategoryColor(product.category),
+            backgroundColor: '#FFFFFF',
             borderRadius: '8px',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
-            fontSize: size === 'small' ? '10px' : '12px',
-            fontWeight: '600',
-            textAlign: 'center',
             padding: '16px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            border: '1px solid #E7E7E7'
           }}
         >
-          <div style={{ 
-            fontSize: size === 'small' ? '24px' : '32px', 
-            marginBottom: '8px',
-            opacity: 0.9
-          }}>
-            {ProductService.getCategoryIcon(product.category)}
-          </div>
-          <div style={{ 
-            fontSize: size === 'small' ? '10px' : '11px',
-            lineHeight: '1.3',
-            maxWidth: '90%',
-            wordBreak: 'break-word'
-          }}>
-            {product.name?.split(' ').slice(0, 2).join(' ') || 'Product'}
-          </div>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.05) 100%)',
-            borderRadius: '8px'
-          }} />
+          <img
+            src={product.images?.[0]?.url || `https://via.placeholder.com/300x300/F0F0F0/999999?text=${encodeURIComponent(product.name?.substring(0, 15) || 'Product')}`}
+            alt={product.name}
+            style={{ 
+              maxWidth: '100%', 
+              maxHeight: '100%', 
+              objectFit: 'contain'
+            }}
+            onError={(e) => {
+              e.target.src = `https://via.placeholder.com/300x300/F0F0F0/999999?text=${encodeURIComponent(product.name?.substring(0, 15) || 'Product')}`;
+            }}
+          />
         </div>
         
         {product.discount > 0 && (

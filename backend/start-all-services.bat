@@ -11,12 +11,16 @@ timeout /t 2 /nobreak >nul
 start "Order Service (5003)" cmd /k "cd order-service && npm start"
 timeout /t 2 /nobreak >nul
 
-start "Auth Service (5004)" cmd /k "cd auth-service && npm start"
+start "Auth Service (5005)" cmd /k "cd auth-service && npm start"
+timeout /t 2 /nobreak >nul
+
+start "Notification Service (5004)" cmd /k "cd notification-service && npm start"
 
 echo.
 echo All services started!
 echo Product Service: http://localhost:5001
 echo Cart Service: http://localhost:5002
 echo Order Service: http://localhost:5003
-echo Auth Service: http://localhost:5004
+echo Notification Service: http://localhost:5004
+echo Auth Service: http://localhost:5005
 pause

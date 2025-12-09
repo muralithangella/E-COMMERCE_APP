@@ -28,10 +28,11 @@ redis.on('error', (err) => console.log('❌ Redis error:', err.message));
 
 // Service registry
 const services = {
-  auth: process.env.AUTH_SERVICE_URL || 'https://localhost:5004',
+  auth: process.env.AUTH_SERVICE_URL || 'https://localhost:5005',
   products: process.env.PRODUCT_SERVICE_URL || 'https://localhost:5001',
   cart: process.env.CART_SERVICE_URL || 'https://localhost:5002',
   orders: process.env.ORDER_SERVICE_URL || 'https://localhost:5003',
+  notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5004',
   main: process.env.MAIN_SERVICE_URL || 'https://localhost:5000'
 };
 

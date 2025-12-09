@@ -13,6 +13,11 @@ const productSchema = new mongoose.Schema({
   },
   rating: { average: { type: Number, default: 0 }, count: { type: Number, default: 0 } },
   discount: { type: Number, default: 0, min: 0 },
+  images: [{
+    url: { type: String, required: true },
+    publicId: { type: String, required: true },
+    isPrimary: { type: Boolean, default: false }
+  }],
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
