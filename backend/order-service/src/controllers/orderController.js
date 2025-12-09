@@ -1,7 +1,19 @@
+const { publishEvent } = require('../utils/rabbitmq');
+
 exports.createOrder = async (req, res) => {
   try {
     const orderNumber = `ORD-${Date.now()}`;
-    res.status(201).json({ orderNumber, status: 'confirmed', ...req.body });
+    const orderData = { orderNumber, status: 'confirmed', ...req.body };
+    
+    // Publish to RabbitMQ
+    try {
+      await publishEvent('ORDER_CREATED', orderData);
+      console.log('✅ Order event published to RabbitMQ:', orderNumber);
+    } catch (error) {
+      console.error('⚠️ Failed to publish to RabbitMQ:', error.message);
+    }
+    
+    res.status(201).json(orderData);
   } catch (error) {
     res.status(400).json({ message: 'Failed to create order', error: error.message });
   }
