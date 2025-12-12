@@ -1,8 +1,11 @@
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
@@ -14,9 +17,17 @@ const limiter = rateLimit({
   message: { success: false, message: 'Too many requests' }
 });
 
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log(`[Worker ${process.pid}] MongoDB connected`))
+  .catch(err => console.error('MongoDB error:', err));
+
 app.use(helmet());
 app.use(compression({ level: 6 }));
-app.use(cors({ credentials: true }));
+app.use(cors({ 
+  origin: ['http://localhost:3000', 'http://www.localhost:3000'],
+  credentials: true 
+}));
+app.use(cookieParser());
 app.use(express.json({ limit: '5mb' }));
 app.use(limiter);
 app.use('/api/cart', cartRoutes);

@@ -2,7 +2,7 @@
 echo Starting All Microservices...
 echo.
 
-start "Product Service (5001)" cmd /k "cd product-service && npm start"
+start "Product Service (5006)" cmd /k "cd product-service && npm start"
 timeout /t 2 /nobreak >nul
 
 start "Cart Service (5002)" cmd /k "cd cart-service && npm start"
@@ -18,7 +18,7 @@ start "Notification Service (5004)" cmd /k "cd notification-service && npm start
 
 echo.
 echo All services started!
-echo Product Service: http://localhost:5001
+echo Product Service: http://localhost:5006
 echo Cart Service: http://localhost:5002
 echo Order Service: http://localhost:5003
 echo Notification Service: http://localhost:5004

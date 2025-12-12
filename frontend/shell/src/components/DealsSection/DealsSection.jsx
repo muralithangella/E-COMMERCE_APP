@@ -2,9 +2,6 @@ import React from 'react';
 import ProductCard from '../ProductCard';
 
 const DealsSection = ({ deals = [], loading = false, onProductClick }) => {
-  
-
-  
 
   if (loading) {
     return <div style={{ padding: '20px', backgroundColor: 'white' }}>Loading deals...</div>;

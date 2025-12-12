@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const productsApi = createApi({
   reducerPath: 'productsApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://localhost:8080/api/products',
+    baseUrl: 'http://localhost:5000/api',
   }),
   tagTypes: ['Product'],
   endpoints: (builder) => ({
@@ -15,7 +15,7 @@ export const productsApi = createApi({
             queryParams.append(key, value);
           }
         });
-        return `?${queryParams.toString()}`;
+        return `products?${queryParams.toString()}`;
       },
       transformResponse: (response) => {
         return response.success ? response.data : [];
@@ -23,14 +23,14 @@ export const productsApi = createApi({
       providesTags: ['Product'],
     }),
     getProduct: builder.query({
-      query: (id) => `/${id}`,
+      query: (id) => `products/${id}`,
       transformResponse: (response) => {
         return response.success ? response.data : null;
       },
       providesTags: (result, error, id) => [{ type: 'Product', id }],
     }),
     getCategories: builder.query({
-      query: () => '/categories',
+      query: () => 'categories',
       transformResponse: (response) => {
         return response.success ? response.data : [];
       },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ProductImage from './ProductImage';
 import './AmazonProductList.css';
 
 const AmazonProductList = ({ category = 'all', searchQuery = '' }) => {
@@ -344,11 +345,7 @@ const AmazonProductList = ({ category = 'all', searchQuery = '' }) => {
                   {products.map(product => (
                     <div key={product.id} className="product-card">
                       <div className="product-image">
-                        <img 
-                          src={product.images?.[0] || product.image} 
-                          alt={product.name}
-                          loading="lazy"
-                        />
+                        <ProductImage product={product} />
                         {product.discount > 0 && (
                           <div className="discount-badge">
                             -{product.discount}%

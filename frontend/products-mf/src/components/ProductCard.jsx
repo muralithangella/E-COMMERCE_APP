@@ -30,8 +30,11 @@ const ProductCard = ({ product }) => {
       <div className="product-card">
       <div className="product-image">
         <img 
-          src={product.image || product.images?.[0] || 'https://picsum.photos/300/200'} 
+          src={product.image || product.images?.[0]?.url || `https://picsum.photos/300/300?random=${product.id || product._id}`} 
           alt={product.name}
+          onError={(e) => {
+            e.target.src = `https://via.placeholder.com/300x300/f0f0f0/666666?text=${encodeURIComponent(product.name.substring(0, 20))}`;
+          }}
         />
       </div>
       

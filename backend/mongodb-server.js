@@ -107,6 +107,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+
 // Product Schema
 const productSchema = new mongoose.Schema({
   name: String,

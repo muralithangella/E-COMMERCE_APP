@@ -17,5 +17,8 @@
   },
   "devDependencies": {
     "pm2": "^5.3.0"
+  },
+  "dependencies": {
+    "mongoose": "^9.0.1"
   }
 }
