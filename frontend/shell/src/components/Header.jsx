@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
 
 const Header = () => {
@@ -219,18 +220,18 @@ const Header = () => {
               <span style={{ marginRight: '4px' }}>☰</span>
               <span style={{ fontSize: '14px', fontWeight: 'bold' }}>All</span>
             </div>
-            <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fresh</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>MX Player</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Sell</a>
-            <a href="/products?sort=bestsellers" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Bestsellers</a>
-            <a href="/products?category=mobiles" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Mobiles</a>
-            <a href="/products?sort=deals" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Today's Deals</a>
-            <a href="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Customer Service</a>
-            <a href="/products?filter=prime" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Prime</a>
-            <a href="/products?category=electronics" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Electronics</a>
-            <a href="/products?category=fashion" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fashion</a>
-            <a href="/products?category=home" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Home & Kitchen</a>
-            <a href="/products?category=books" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Books</a>
+            <Link to="/" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fresh</Link>
+            <Link to="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>MX Player</Link>
+            <Link to="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Sell</Link>
+            <Link to="/products?sort=bestsellers" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Bestsellers</Link>
+            <Link to="/products?category=mobiles" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Mobiles</Link>
+            <Link to="/products?sort=deals" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Today's Deals</Link>
+            <Link to="/products" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Customer Service</Link>
+            <Link to="/products?filter=prime" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Prime</Link>
+            <Link to="/products?category=electronics" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Electronics</Link>
+            <Link to="/products?category=fashion" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Fashion</Link>
+            <Link to="/products?category=home" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Home & Kitchen</Link>
+            <Link to="/products?category=books" style={{ color: 'white', textDecoration: 'none', fontSize: '14px', padding: '4px 8px' }}>Books</Link>
           </div>
         </div>
       </header>
